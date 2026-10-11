@@ -1,0 +1,18 @@
+# V1.0 发布包专用 .gitignore（E 盘干净副本）
+# 派生/缓存/本地运行产物一律不入库
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.local
+tmp/
+tmp-*/
+.mimosa/
+.zcode/
+.worktrees/
+output/
+*.bundle
+.DS_Store
+Thumbs.db
