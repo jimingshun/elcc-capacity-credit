@@ -1,0 +1,347 @@
+{
+  "$defs": {
+    "AllocationType": {
+      "description": "Allocation of capacity value results (methodology V0.4 §11.3).",
+      "enum": [
+        "none",
+        "governance_rule"
+      ],
+      "title": "AllocationType",
+      "type": "string"
+    },
+    "CapacityValueType": {
+      "description": "Capacity value types (methodology V0.4 §11).",
+      "enum": [
+        "average",
+        "marginal",
+        "portfolio",
+        "not_applicable"
+      ],
+      "title": "CapacityValueType",
+      "type": "string"
+    },
+    "LifecycleStatus": {
+      "description": "Task lifecycle status; describes the process only (contract V0.2 §4.2).",
+      "enum": [
+        "created",
+        "queued",
+        "running",
+        "stopping",
+        "completed",
+        "failed",
+        "cancelled"
+      ],
+      "title": "LifecycleStatus",
+      "type": "string"
+    },
+    "RunMode": {
+      "description": "Run modes (application service contract V0.2 §3).",
+      "enum": [
+        "formal",
+        "teaching",
+        "benchmark"
+      ],
+      "title": "RunMode",
+      "type": "string"
+    },
+    "RunType": {
+      "description": "Run types (application service contract V0.2 §3; product design §6.2).",
+      "enum": [
+        "validate",
+        "adequacy",
+        "elcc",
+        "efc",
+        "mri",
+        "rmri",
+        "portfolio",
+        "sensitivity",
+        "benchmark",
+        "report",
+        "demand_target_capacity"
+      ],
+      "title": "RunType",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/run-manifest-1.0.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "run_type": {
+            "const": "elcc"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "application_config_hash": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "method_config_hash": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "method_config_hash",
+          "application_config_hash"
+        ]
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "run_type": {
+              "const": "elcc"
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "application_config_hash": {
+            "type": "null"
+          },
+          "method_config_hash": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "description": "Immutable run manifest (application service contract V0.2 §4.1).",
+  "properties": {
+    "allocation_rule_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Allocation Rule Id"
+    },
+    "allocation_type": {
+      "$ref": "#/$defs/AllocationType"
+    },
+    "application_config_hash": {
+      "default": null,
+      "oneOf": [
+        {
+          "pattern": "[0-9a-fA-F]{64}",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Application Config Hash"
+    },
+    "artifact_manifest_ids": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Artifact Manifest Ids",
+      "type": "array"
+    },
+    "baseline_portfolio_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Baseline Portfolio Version"
+    },
+    "capacity_value_type": {
+      "$ref": "#/$defs/CapacityValueType"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "created_by": {
+      "title": "Created By",
+      "type": "string"
+    },
+    "data_version_hash": {
+      "pattern": "[0-9a-fA-F]{64}",
+      "title": "Data Version Hash",
+      "type": "string"
+    },
+    "data_version_id": {
+      "title": "Data Version Id",
+      "type": "string"
+    },
+    "dataset_id": {
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "finished_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Finished At"
+    },
+    "import_batch_id": {
+      "format": "uuid",
+      "title": "Import Batch Id",
+      "type": "string"
+    },
+    "lifecycle_status": {
+      "$ref": "#/$defs/LifecycleStatus"
+    },
+    "method_config_hash": {
+      "default": null,
+      "oneOf": [
+        {
+          "pattern": "[0-9a-fA-F]{64}",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Method Config Hash"
+    },
+    "method_profile": {
+      "title": "Method Profile",
+      "type": "string"
+    },
+    "parent_run_ids": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Parent Run Ids",
+      "type": "array"
+    },
+    "result_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Result Id"
+    },
+    "run_config_hash": {
+      "pattern": "[0-9a-fA-F]{64}",
+      "title": "Run Config Hash",
+      "type": "string"
+    },
+    "run_config_path": {
+      "title": "Run Config Path",
+      "type": "string"
+    },
+    "run_id": {
+      "format": "uuid",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "run_mode": {
+      "$ref": "#/$defs/RunMode"
+    },
+    "run_schema_version": {
+      "const": "1.0",
+      "title": "Run Schema Version",
+      "type": "string"
+    },
+    "run_type": {
+      "$ref": "#/$defs/RunType"
+    },
+    "scenario_bank_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Bank Id"
+    },
+    "software_commit": {
+      "title": "Software Commit",
+      "type": "string"
+    },
+    "software_version": {
+      "title": "Software Version",
+      "type": "string"
+    },
+    "source_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Run Id"
+    },
+    "started_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Started At"
+    }
+  },
+  "required": [
+    "run_schema_version",
+    "run_id",
+    "run_type",
+    "run_mode",
+    "lifecycle_status",
+    "dataset_id",
+    "data_version_id",
+    "data_version_hash",
+    "import_batch_id",
+    "run_config_path",
+    "run_config_hash",
+    "software_version",
+    "software_commit",
+    "method_profile",
+    "capacity_value_type",
+    "allocation_type",
+    "created_by",
+    "created_at"
+  ],
+  "title": "run-manifest-1.0.json",
+  "type": "object",
+  "x-contract-version": "1.0"
+}

@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "capacity-credit"
+version = "0.1.0"
+description = "Local, auditable ELCC / EFC / MRI (rMRI) capacity credit assessment toolkit"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy",
+    "scipy",
+    "pandas",
+    "pyarrow",
+    "pydantic>=2",
+    "typer",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = [
+    "hypothesis",
+    "mypy",
+    "pip-tools",
+    "pytest",
+    "ruff",
+]
+report = [
+    "jinja2",
+    "openpyxl",
+    "plotly",
+    "xlsxwriter",
+]
+
+[project.scripts]
+elcc-tool = "capacity_credit.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "slow: long-running or full-year evidence tests excluded from quick gates",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[[tool.mypy.overrides]]
+module = "scipy.*"
+ignore_missing_imports = true

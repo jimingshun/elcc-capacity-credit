@@ -1,0 +1,277 @@
+{
+  "$defs": {
+    "ArtifactEntry": {
+      "additionalProperties": false,
+      "description": "Single artifact record inside the manifest.",
+      "properties": {
+        "artifact_type": {
+          "$ref": "#/$defs/ArtifactType"
+        },
+        "media_type": {
+          "title": "Media Type",
+          "type": "string"
+        },
+        "producer_service": {
+          "title": "Producer Service",
+          "type": "string"
+        },
+        "relative_path": {
+          "title": "Relative Path",
+          "type": "string"
+        },
+        "schema_or_template_version": {
+          "title": "Schema Or Template Version",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "[0-9a-fA-F]{64}",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_type",
+        "relative_path",
+        "sha256",
+        "media_type",
+        "producer_service",
+        "schema_or_template_version"
+      ],
+      "title": "ArtifactEntry",
+      "type": "object"
+    },
+    "ArtifactType": {
+      "description": "Artifact types (application service contract V0.2 §7.1).\n\nT19 supplement: ``ANALYSIS_SUMMARY`` registers a portfolio /\nsensitivity coordination artifact (portfolio_summary.json,\npenetration_sequence.json, governance_allocation.json,\nsensitivity_matrix.json) into a formal artifact manifest of a\ncoordination run (run_type=portfolio / sensitivity, which has no\nMethodResult).",
+      "enum": [
+        "json_result",
+        "parquet_result",
+        "excel_report",
+        "html_report",
+        "figure",
+        "verify_bundle",
+        "rerun_bundle",
+        "search_trace",
+        "analysis_summary"
+      ],
+      "title": "ArtifactType",
+      "type": "string"
+    },
+    "ConfidentialityLevel": {
+      "description": "Artifact confidentiality (application service contract V0.2 §7.1).",
+      "enum": [
+        "internal",
+        "restricted",
+        "public_sanitized"
+      ],
+      "title": "ConfidentialityLevel",
+      "type": "string"
+    },
+    "RedactionStatus": {
+      "description": "Artifact redaction status (application service contract V0.2 §7.1).",
+      "enum": [
+        "not_required",
+        "pending",
+        "completed"
+      ],
+      "title": "RedactionStatus",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/artifact-manifest-1.1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "manifest_kind": {
+            "const": "coordination"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "artifacts": {
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "artifact_type": {
+                      "const": "analysis_summary"
+                    }
+                  },
+                  "required": [
+                    "artifact_type"
+                  ]
+                }
+              },
+              {
+                "not": {
+                  "contains": {
+                    "properties": {
+                      "artifact_type": {
+                        "const": "json_result"
+                      }
+                    },
+                    "required": [
+                      "artifact_type"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "result_id": {
+            "type": "null"
+          },
+          "run_type": {
+            "enum": [
+              "portfolio",
+              "sensitivity"
+            ]
+          }
+        },
+        "required": [
+          "artifacts"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "manifest_kind": {
+            "const": "result"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "artifacts": {
+            "contains": {
+              "properties": {
+                "artifact_type": {
+                  "const": "json_result"
+                }
+              },
+              "required": [
+                "artifact_type"
+              ]
+            },
+            "maxContains": 1,
+            "minContains": 1
+          },
+          "result_id": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "result_id",
+          "artifacts"
+        ]
+      }
+    }
+  ],
+  "description": "artifact-manifest 1.1: versioned manifest with an explicit\n``manifest_kind``. A COORDINATION manifest (portfolio / sensitivity\nrun with no MethodResult) carries ``result_id=null`` and only\n``analysis_summary`` / ``search_trace`` artifacts; a RESULT manifest\ncarries ``result_id`` and exactly one json_result entry.",
+  "properties": {
+    "artifact_manifest_id": {
+      "format": "uuid",
+      "title": "Artifact Manifest Id",
+      "type": "string"
+    },
+    "artifact_schema_version": {
+      "const": "1.1",
+      "title": "Artifact Schema Version",
+      "type": "string"
+    },
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/ArtifactEntry"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "confidentiality_level": {
+      "$ref": "#/$defs/ConfidentialityLevel"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "generated_by": {
+      "title": "Generated By",
+      "type": "string"
+    },
+    "manifest_kind": {
+      "enum": [
+        "result",
+        "coordination"
+      ],
+      "title": "Manifest Kind",
+      "type": "string"
+    },
+    "redaction_status": {
+      "$ref": "#/$defs/RedactionStatus"
+    },
+    "report_mapping_version": {
+      "enum": [
+        "1.0",
+        "1.1"
+      ],
+      "title": "Report Mapping Version",
+      "type": "string"
+    },
+    "result_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Result Id"
+    },
+    "run_id": {
+      "format": "uuid",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "run_type": {
+      "title": "Run Type",
+      "type": "string"
+    },
+    "source_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Run Id"
+    }
+  },
+  "required": [
+    "artifact_schema_version",
+    "manifest_kind",
+    "run_type",
+    "artifact_manifest_id",
+    "run_id",
+    "report_mapping_version",
+    "confidentiality_level",
+    "redaction_status",
+    "generated_by",
+    "generated_at"
+  ],
+  "title": "artifact-manifest-1.1.json",
+  "type": "object",
+  "x-contract-version": "1.1"
+}

@@ -1,0 +1,2 @@
+[console_scripts]
+elcc-tool = capacity_credit.cli:app

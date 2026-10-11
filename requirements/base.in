@@ -1,0 +1,11 @@
+# Core runtime dependencies (installed from the generated lock file).
+# Pin policy: requirements/locks/windows-py312.txt is the single source of
+# truth for installed versions; do not guess versions here.
+
+numpy
+scipy
+pandas
+pyarrow
+pydantic>=2
+typer
+pyyaml

@@ -1,0 +1,598 @@
+{
+  "$defs": {
+    "AllocationType": {
+      "description": "Allocation of capacity value results (methodology V0.4 §11.3).",
+      "enum": [
+        "none",
+        "governance_rule"
+      ],
+      "title": "AllocationType",
+      "type": "string"
+    },
+    "AssessmentAnchor": {
+      "description": "MRI/rMRI assessment anchor (methodology V0.4 §7.4).",
+      "enum": [
+        "current_system",
+        "calibrated_standard"
+      ],
+      "title": "AssessmentAnchor",
+      "type": "string"
+    },
+    "CapacityValueType": {
+      "description": "Capacity value types (methodology V0.4 §11).",
+      "enum": [
+        "average",
+        "marginal",
+        "portfolio",
+        "not_applicable"
+      ],
+      "title": "CapacityValueType",
+      "type": "string"
+    },
+    "ChronologyMode": {
+      "description": "Time-series organisation mode (methodology V0.4 §6.3).",
+      "enum": [
+        "independent_weather_years",
+        "continuous_multiyear"
+      ],
+      "title": "ChronologyMode",
+      "type": "string"
+    },
+    "CrnConfig": {
+      "additionalProperties": false,
+      "description": "run-config 1.1 ``crn_config`` (§16A.4.3).\n\nMRI/rMRI never allow ``enabled=false``; ``scenario_bank_id`` keeps a\nsingle canonical position at run-config top level and is referenced\nhere, never duplicated as a second source of truth.",
+      "properties": {
+        "enabled": {
+          "const": true,
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "pairing_key_fields": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Pairing Key Fields",
+          "type": "array"
+        },
+        "random_stream_version": {
+          "title": "Random Stream Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "random_stream_version",
+        "pairing_key_fields"
+      ],
+      "title": "CrnConfig",
+      "type": "object"
+    },
+    "CustomPerturbationComponent": {
+      "additionalProperties": false,
+      "description": "One custom-vector component with an explicit physical unit\n(method-result 2.0 ``custom_components`` / run-config 1.1\n``custom_perturbation_vector.components``). A frozen structured\ncomponent - never an unlabelled ``Any`` dict.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "power_mw",
+            "energy_mwh",
+            "other"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "role",
+        "name",
+        "value",
+        "unit"
+      ],
+      "title": "CustomPerturbationComponent",
+      "type": "object"
+    },
+    "CustomPerturbationVector": {
+      "additionalProperties": false,
+      "description": "run-config 1.1 ``custom_perturbation_vector`` (structured, frozen).\n\n``value`` of each component is the per-scalar-step delta in the\ncomponent's physical unit; ``scalar_step_unit`` declares the scalar\nstep unit. ``mw_equivalent_per_scalar_unit`` is the explicit MW\nequivalent mapping used ONLY for rMRI normalisation (absent -> the\nraw MRI is preserved with ``RMRI_CUSTOM_NORMALIZATION_MISSING``).",
+      "properties": {
+        "components": {
+          "items": {
+            "$ref": "#/$defs/CustomPerturbationComponent"
+          },
+          "minItems": 1,
+          "title": "Components",
+          "type": "array"
+        },
+        "mw_equivalent_per_scalar_unit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mw Equivalent Per Scalar Unit"
+        },
+        "scalar_step_unit": {
+          "title": "Scalar Step Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "scalar_step_unit",
+        "components"
+      ],
+      "title": "CustomPerturbationVector",
+      "type": "object"
+    },
+    "DifferenceScheme": {
+      "description": "MRI finite-difference scheme (methodology §16A.4). ``difference_scheme``\nin run-config is the REQUESTED scheme; each step evaluation records the\nAPPLIED scheme separately.",
+      "enum": [
+        "forward",
+        "central"
+      ],
+      "title": "DifferenceScheme",
+      "type": "string"
+    },
+    "EngineeringTolerance": {
+      "additionalProperties": false,
+      "description": "run-config 1.1 ``engineering_tolerance`` (§16A.4.1).",
+      "properties": {
+        "capacity_mw": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Capacity Mw"
+        },
+        "energy_mwh": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Energy Mwh"
+        }
+      },
+      "title": "EngineeringTolerance",
+      "type": "object"
+    },
+    "MriMethodConfig": {
+      "additionalProperties": false,
+      "description": "Typed MRI method section (run-config 1.1 ``method_config``).\n\n``resource_or_portfolio_id`` identifies the REAL target resource /\nportfolio being perturbed (resolved against the frozen standard\ntables by object identity - never a surrogate for the perturbation\ndimension). ``duration_hours`` is the fixed base duration required\nfor ``fixed_duration`` so ``delta_energy_mwh = duration_hours x\ndelta_power_mw`` and the before/after duration stay equal.",
+      "properties": {
+        "base_step": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Step"
+        },
+        "crn_config": {
+          "$ref": "#/$defs/CrnConfig"
+        },
+        "custom_perturbation_vector": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CustomPerturbationVector"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "difference_scheme": {
+          "$ref": "#/$defs/DifferenceScheme"
+        },
+        "duration_hours": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Hours"
+        },
+        "engineering_tolerance": {
+          "$ref": "#/$defs/EngineeringTolerance"
+        },
+        "method_config_schema_version": {
+          "const": "1.1",
+          "default": "1.1",
+          "title": "Method Config Schema Version",
+          "type": "string"
+        },
+        "normalization_basis_mwh_per_mw": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Normalization Basis Mwh Per Mw"
+        },
+        "perturbation_dimension": {
+          "$ref": "#/$defs/PerturbationDimension"
+        },
+        "physical_domain": {
+          "$ref": "#/$defs/PhysicalDomain"
+        },
+        "resource_or_portfolio_id": {
+          "title": "Resource Or Portfolio Id",
+          "type": "string"
+        },
+        "stability_thresholds": {
+          "$ref": "#/$defs/StabilityThresholds"
+        },
+        "step_mode": {
+          "$ref": "#/$defs/StepMode"
+        },
+        "step_multipliers": {
+          "items": {
+            "type": "number"
+          },
+          "title": "Step Multipliers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "resource_or_portfolio_id",
+        "perturbation_dimension",
+        "difference_scheme",
+        "step_mode",
+        "engineering_tolerance",
+        "physical_domain",
+        "crn_config",
+        "stability_thresholds"
+      ],
+      "title": "MriMethodConfig",
+      "type": "object"
+    },
+    "PerturbationDimension": {
+      "description": "MRI perturbation dimension (methodology V0.4 §10.1).",
+      "enum": [
+        "fixed_duration",
+        "power_only",
+        "energy_only",
+        "custom_vector"
+      ],
+      "title": "PerturbationDimension",
+      "type": "string"
+    },
+    "PhysicalDomain": {
+      "additionalProperties": false,
+      "description": "run-config 1.1 ``physical_domain`` (§16A.4.2).",
+      "properties": {
+        "constraint_source": {
+          "title": "Constraint Source",
+          "type": "string"
+        },
+        "max_negative_step": {
+          "default": 0.0,
+          "title": "Max Negative Step",
+          "type": "number"
+        },
+        "max_positive_step": {
+          "title": "Max Positive Step",
+          "type": "number"
+        },
+        "step_unit": {
+          "enum": [
+            "mw",
+            "mwh"
+          ],
+          "title": "Step Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_unit",
+        "max_positive_step",
+        "constraint_source"
+      ],
+      "title": "PhysicalDomain",
+      "type": "object"
+    },
+    "RiskMetric": {
+      "description": "Primary risk metric machine values (methodology V0.4 §3.4).",
+      "enum": [
+        "lole_days_per_year",
+        "lolh_hours_per_year",
+        "eue_mwh_per_year",
+        "neue_ppm"
+      ],
+      "title": "RiskMetric",
+      "type": "string"
+    },
+    "RunMode": {
+      "description": "Run modes (application service contract V0.2 §3).",
+      "enum": [
+        "formal",
+        "teaching",
+        "benchmark"
+      ],
+      "title": "RunMode",
+      "type": "string"
+    },
+    "RunType": {
+      "description": "Run types (application service contract V0.2 §3; product design §6.2).",
+      "enum": [
+        "validate",
+        "adequacy",
+        "elcc",
+        "efc",
+        "mri",
+        "rmri",
+        "portfolio",
+        "sensitivity",
+        "benchmark",
+        "report",
+        "demand_target_capacity"
+      ],
+      "title": "RunType",
+      "type": "string"
+    },
+    "SocYearBoundaryMode": {
+      "description": "SOC year-boundary mode (methodology V0.4 §6.3).",
+      "enum": [
+        "carry_over",
+        "reinitialize_with_configured_mode",
+        "not_applicable"
+      ],
+      "title": "SocYearBoundaryMode",
+      "type": "string"
+    },
+    "StabilitySourceType": {
+      "description": "stability_thresholds.source_type (methodology §16A.4.4).",
+      "enum": [
+        "software_default",
+        "method_review",
+        "project_config",
+        "policy_rule"
+      ],
+      "title": "StabilitySourceType",
+      "type": "string"
+    },
+    "StabilityThresholds": {
+      "additionalProperties": false,
+      "description": "run-config 1.1 ``stability_thresholds`` (§16A.4.4).",
+      "properties": {
+        "denominator_relative_se_max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Denominator Relative Se Max"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "source_type": {
+          "$ref": "#/$defs/StabilitySourceType"
+        },
+        "step_consistency_rule": {
+          "const": "joint_confidence_interval",
+          "default": "joint_confidence_interval",
+          "title": "Step Consistency Rule",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_type",
+        "source_ref"
+      ],
+      "title": "StabilityThresholds",
+      "type": "object"
+    },
+    "StepMode": {
+      "description": "MRI base-step mode (methodology §16A.4): ``adaptive`` computes the base\nstep from the methodology §10.3 formula; ``explicit`` requires a positive\n``base_step``.",
+      "enum": [
+        "adaptive",
+        "explicit"
+      ],
+      "title": "StepMode",
+      "type": "string"
+    },
+    "StorageSocInitializationMode": {
+      "description": "SOC initialization mode (methodology V0.4 §6.3).",
+      "enum": [
+        "weather_cycle_warmup",
+        "stochastic_sample_burnin",
+        "not_applicable"
+      ],
+      "title": "StorageSocInitializationMode",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/run-config-1.1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Formal run-config 1.1 (MRI/rMRI). Field set extends 1.0 with the\nstructured MRI objects; the version reader dispatches 1.0/1.1.",
+  "properties": {
+    "allocation_rule_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Allocation Rule Id"
+    },
+    "allocation_type": {
+      "$ref": "#/$defs/AllocationType"
+    },
+    "assessment_anchor": {
+      "$ref": "#/$defs/AssessmentAnchor"
+    },
+    "baseline_portfolio_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Baseline Portfolio Version"
+    },
+    "capacity_value_type": {
+      "$ref": "#/$defs/CapacityValueType"
+    },
+    "chronology_mode": {
+      "$ref": "#/$defs/ChronologyMode"
+    },
+    "method_config": {
+      "$ref": "#/$defs/MriMethodConfig"
+    },
+    "method_profile": {
+      "title": "Method Profile",
+      "type": "string"
+    },
+    "normalization_basis_mwh_per_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalization Basis Mwh Per Mw"
+    },
+    "parent_run_ids": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Parent Run Ids",
+      "type": "array"
+    },
+    "perturbation_dimension": {
+      "$ref": "#/$defs/PerturbationDimension"
+    },
+    "primary_risk_metric": {
+      "$ref": "#/$defs/RiskMetric"
+    },
+    "random_seed": {
+      "title": "Random Seed",
+      "type": "integer"
+    },
+    "run_config_schema_version": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Run Config Schema Version",
+      "type": "string"
+    },
+    "run_mode": {
+      "$ref": "#/$defs/RunMode"
+    },
+    "run_type": {
+      "$ref": "#/$defs/RunType"
+    },
+    "scenario_bank_id": {
+      "title": "Scenario Bank Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Id"
+    },
+    "soc_year_boundary_mode": {
+      "$ref": "#/$defs/SocYearBoundaryMode"
+    },
+    "source_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Run Id"
+    },
+    "storage_soc_initialization_mode": {
+      "$ref": "#/$defs/StorageSocInitializationMode"
+    },
+    "weather_year_weight_set_id": {
+      "title": "Weather Year Weight Set Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_mode",
+    "run_type",
+    "method_profile",
+    "primary_risk_metric",
+    "weather_year_weight_set_id",
+    "chronology_mode",
+    "storage_soc_initialization_mode",
+    "soc_year_boundary_mode",
+    "assessment_anchor",
+    "perturbation_dimension",
+    "capacity_value_type",
+    "allocation_type",
+    "random_seed",
+    "scenario_bank_id",
+    "method_config"
+  ],
+  "title": "run-config-1.1.json",
+  "type": "object",
+  "x-contract-version": "1.1"
+}

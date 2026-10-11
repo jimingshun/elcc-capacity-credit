@@ -1,0 +1,694 @@
+{
+  "$defs": {
+    "AdequacyConfig12": {
+      "additionalProperties": false,
+      "description": "Structured adequacy EXECUTION settings for run-config 1.2\n(V1-T3-A, D1 §6.3): the field semantics reuse the resource-run\nconfiguration (application layer ``ResourceRunConfig``) and the\ntyped ``StorageSocConfig``. Facts the OUTER run-config already owns\nare deliberately NOT duplicated (scenario bank, root seed, weather\nyears / weights) - a duplicate reference must agree or be refused,\nand the absence of a second copy is the strongest agreement.\nIndependent adequacy never exposes search parameters:\n``perfect_capacity_mw`` is fixed to 0.",
+      "properties": {
+        "adequacy_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Adequacy Config Schema Version",
+          "type": "string"
+        },
+        "auto_schedule_planned_outages": {
+          "default": false,
+          "title": "Auto Schedule Planned Outages",
+          "type": "boolean"
+        },
+        "convergence": {
+          "$ref": "#/$defs/ConvergenceConfig12"
+        },
+        "delta_t_hours": {
+          "default": 1.0,
+          "title": "Delta T Hours",
+          "type": "number"
+        },
+        "dispatch_strategy": {
+          "default": "eue_greedy",
+          "title": "Dispatch Strategy",
+          "type": "string"
+        },
+        "emergency_limit_source": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Emergency Limit Source"
+        },
+        "hydro_adjustable_request_mw": {
+          "default": 0.0,
+          "title": "Hydro Adjustable Request Mw",
+          "type": "number"
+        },
+        "intertie_availability_policy": {
+          "default": "zero",
+          "title": "Intertie Availability Policy",
+          "type": "string"
+        },
+        "merge_events_across_years": {
+          "default": false,
+          "title": "Merge Events Across Years",
+          "type": "boolean"
+        },
+        "perfect_capacity_mw": {
+          "default": 0.0,
+          "title": "Perfect Capacity Mw",
+          "type": "number"
+        },
+        "reserve_soc_fraction": {
+          "default": 0.0,
+          "title": "Reserve Soc Fraction",
+          "type": "number"
+        },
+        "risk_threshold": {
+          "default": 0.05,
+          "title": "Risk Threshold",
+          "type": "number"
+        },
+        "risk_window_length_hours": {
+          "default": 24,
+          "title": "Risk Window Length Hours",
+          "type": "integer"
+        },
+        "samples": {
+          "title": "Samples",
+          "type": "integer"
+        },
+        "scenario_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scenario Id"
+        },
+        "storage_soc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageSocConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "samples",
+        "convergence"
+      ],
+      "title": "AdequacyConfig12",
+      "type": "object"
+    },
+    "AllocationType": {
+      "description": "Allocation of capacity value results (methodology V0.4 §11.3).",
+      "enum": [
+        "none",
+        "governance_rule"
+      ],
+      "title": "AllocationType",
+      "type": "string"
+    },
+    "AssessmentAnchor": {
+      "description": "MRI/rMRI assessment anchor (methodology V0.4 §7.4).",
+      "enum": [
+        "current_system",
+        "calibrated_standard"
+      ],
+      "title": "AssessmentAnchor",
+      "type": "string"
+    },
+    "CapacityValueType": {
+      "description": "Capacity value types (methodology V0.4 §11).",
+      "enum": [
+        "average",
+        "marginal",
+        "portfolio",
+        "not_applicable"
+      ],
+      "title": "CapacityValueType",
+      "type": "string"
+    },
+    "ChronologyMode": {
+      "description": "Time-series organisation mode (methodology V0.4 §6.3).",
+      "enum": [
+        "independent_weather_years",
+        "continuous_multiyear"
+      ],
+      "title": "ChronologyMode",
+      "type": "string"
+    },
+    "ConvergenceConfig12": {
+      "additionalProperties": false,
+      "description": "Structured convergence settings for run-config 1.2 (V1-T3-A): the\nfield semantics are the shared ``ConvergenceConfig`` evidence gate\n(engine layer), serialized here as the typed frozen-config section.\n``primary_risk_metric`` deliberately defaults to null = the OUTER\nrun-config metric; an explicit value must equal it (one authority,\nnever two movable copies).",
+      "properties": {
+        "absolute_half_width_tolerance": {
+          "title": "Absolute Half Width Tolerance",
+          "type": "number"
+        },
+        "batch_size": {
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "confidence_level": {
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "convergence_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Convergence Config Schema Version",
+          "type": "string"
+        },
+        "max_samples": {
+          "title": "Max Samples",
+          "type": "integer"
+        },
+        "min_nonzero_samples": {
+          "title": "Min Nonzero Samples",
+          "type": "integer"
+        },
+        "min_samples": {
+          "title": "Min Samples",
+          "type": "integer"
+        },
+        "near_zero_threshold": {
+          "title": "Near Zero Threshold",
+          "type": "number"
+        },
+        "normal_interval_min_samples": {
+          "default": 200,
+          "title": "Normal Interval Min Samples",
+          "type": "integer"
+        },
+        "primary_risk_metric": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Primary Risk Metric"
+        },
+        "provisional_defaults": {
+          "default": true,
+          "title": "Provisional Defaults",
+          "type": "boolean"
+        },
+        "recent_batch_stability_tolerance": {
+          "title": "Recent Batch Stability Tolerance",
+          "type": "number"
+        },
+        "recent_batch_window": {
+          "title": "Recent Batch Window",
+          "type": "integer"
+        },
+        "relative_half_width_tolerance": {
+          "title": "Relative Half Width Tolerance",
+          "type": "number"
+        },
+        "use_student_t": {
+          "default": true,
+          "title": "Use Student T",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "batch_size",
+        "min_samples",
+        "max_samples",
+        "confidence_level",
+        "relative_half_width_tolerance",
+        "absolute_half_width_tolerance",
+        "near_zero_threshold",
+        "min_nonzero_samples",
+        "recent_batch_window",
+        "recent_batch_stability_tolerance"
+      ],
+      "title": "ConvergenceConfig12",
+      "type": "object"
+    },
+    "PerturbationDimension": {
+      "description": "MRI perturbation dimension (methodology V0.4 §10.1).",
+      "enum": [
+        "fixed_duration",
+        "power_only",
+        "energy_only",
+        "custom_vector"
+      ],
+      "title": "PerturbationDimension",
+      "type": "string"
+    },
+    "RiskMetric": {
+      "description": "Primary risk metric machine values (methodology V0.4 §3.4).",
+      "enum": [
+        "lole_days_per_year",
+        "lolh_hours_per_year",
+        "eue_mwh_per_year",
+        "neue_ppm"
+      ],
+      "title": "RiskMetric",
+      "type": "string"
+    },
+    "RunMode": {
+      "description": "Run modes (application service contract V0.2 §3).",
+      "enum": [
+        "formal",
+        "teaching",
+        "benchmark"
+      ],
+      "title": "RunMode",
+      "type": "string"
+    },
+    "RunType": {
+      "description": "Run types (application service contract V0.2 §3; product design §6.2).",
+      "enum": [
+        "validate",
+        "adequacy",
+        "elcc",
+        "efc",
+        "mri",
+        "rmri",
+        "portfolio",
+        "sensitivity",
+        "benchmark",
+        "report",
+        "demand_target_capacity"
+      ],
+      "title": "RunType",
+      "type": "string"
+    },
+    "SocYearBoundaryMode": {
+      "description": "SOC year-boundary mode (methodology V0.4 §6.3).",
+      "enum": [
+        "carry_over",
+        "reinitialize_with_configured_mode",
+        "not_applicable"
+      ],
+      "title": "SocYearBoundaryMode",
+      "type": "string"
+    },
+    "StorageBurninConfig": {
+      "additionalProperties": false,
+      "description": "Stochastic sample burn-in parameters (provisional / pending\nbenchmark - never policy constants). Stability is judged by the\nLENGTH comparison of the same batch and stream (see\nstorage_chronology.compare_burnin_lengths); the two tolerances are\npart of this controlled config and enter the schema and hashes.",
+      "properties": {
+        "benchmark_status": {
+          "const": "pending_benchmark",
+          "default": "pending_benchmark",
+          "title": "Benchmark Status",
+          "type": "string"
+        },
+        "burnin_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Burnin Config Schema Version",
+          "type": "string"
+        },
+        "burnin_hours": {
+          "title": "Burnin Hours",
+          "type": "integer"
+        },
+        "length_stability_eue_tolerance_mwh": {
+          "title": "Length Stability Eue Tolerance Mwh",
+          "type": "number"
+        },
+        "length_stability_soc_tolerance_mwh": {
+          "title": "Length Stability Soc Tolerance Mwh",
+          "type": "number"
+        },
+        "provisional_status": {
+          "const": "provisional",
+          "default": "provisional",
+          "title": "Provisional Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "burnin_hours",
+        "length_stability_soc_tolerance_mwh",
+        "length_stability_eue_tolerance_mwh"
+      ],
+      "title": "StorageBurninConfig",
+      "type": "object"
+    },
+    "StorageEndOfCycleRechargeConfig": {
+      "additionalProperties": false,
+      "description": "W2/B6-2: the end-of-cycle recharge window (方法说明第三章(一)\n周期末回充约束, provisional). Disabled by default - enabling it\nfloors each unit's discharge inside the final ``window_hours`` of\nevery charge cycle at ``target_soc_fraction x energy_capacity``\n(energy for the next cycle; no charging is ever invented).",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "end_of_cycle_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "End Of Cycle Schema Version",
+          "type": "string"
+        },
+        "provisional_status": {
+          "const": "provisional",
+          "default": "provisional",
+          "title": "Provisional Status",
+          "type": "string"
+        },
+        "target_soc_fraction": {
+          "default": 0.8,
+          "title": "Target Soc Fraction",
+          "type": "number"
+        },
+        "window_hours": {
+          "default": 4,
+          "title": "Window Hours",
+          "type": "integer"
+        }
+      },
+      "title": "StorageEndOfCycleRechargeConfig",
+      "type": "object"
+    },
+    "StorageSocConfig": {
+      "additionalProperties": false,
+      "description": "Typed storage SOC initialization configuration (methodology V0.4\n§6.3). Exactly one initialization mode; the burn-in section is\nrequired for stochastic_sample_burnin and forbidden otherwise; the\nS-13 explicit-initial-SOC escape hatch is only for specific tests or\nexplicit user configuration and never becomes the default warm-up.",
+      "properties": {
+        "burnin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageBurninConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "end_of_cycle_recharge": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageEndOfCycleRechargeConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "explicit_initial_soc_mwh": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explicit Initial Soc Mwh"
+        },
+        "initialization_mode": {
+          "$ref": "#/$defs/StorageSocInitializationMode"
+        },
+        "storage_soc_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Storage Soc Config Schema Version",
+          "type": "string"
+        },
+        "warmup_max_cycles": {
+          "default": 5,
+          "title": "Warmup Max Cycles",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "initialization_mode"
+      ],
+      "title": "StorageSocConfig",
+      "type": "object"
+    },
+    "StorageSocInitializationMode": {
+      "description": "SOC initialization mode (methodology V0.4 §6.3).",
+      "enum": [
+        "weather_cycle_warmup",
+        "stochastic_sample_burnin",
+        "not_applicable"
+      ],
+      "title": "StorageSocInitializationMode",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/run-config-1.2.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "run_config_schema_version": {
+            "const": "1.2"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "run_type": {
+            "const": "adequacy"
+          }
+        },
+        "required": [
+          "adequacy_config"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_config_schema_version": {
+            "const": "1.2"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "capacity_value_type": {
+            "const": "not_applicable"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chronology_mode": {
+            "const": "continuous_multiyear"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "soc_year_boundary_mode": {
+            "enum": [
+              "carry_over"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chronology_mode": {
+            "const": "independent_weather_years"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "soc_year_boundary_mode": {
+            "not": {
+              "enum": [
+                "carry_over"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "description": "Formal run-config 1.2 (V1-T3, D1 §6.3): adequacy-only, adding the\nstructured ``adequacy_config`` execution section. The 1.0 field\nsemantics are unchanged (no in-place widening); the manifest stays\n1.0 and its ``run_config_hash`` covers this FULL document. The\ncapacity-method lineage hashes stay null for adequacy - the\nadequacy_config travels inside the hashed run config itself.",
+  "properties": {
+    "adequacy_config": {
+      "$ref": "#/$defs/AdequacyConfig12"
+    },
+    "allocation_rule_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Allocation Rule Id"
+    },
+    "allocation_type": {
+      "$ref": "#/$defs/AllocationType"
+    },
+    "assessment_anchor": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AssessmentAnchor"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "baseline_portfolio_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Baseline Portfolio Version"
+    },
+    "capacity_value_type": {
+      "$ref": "#/$defs/CapacityValueType"
+    },
+    "chronology_mode": {
+      "$ref": "#/$defs/ChronologyMode"
+    },
+    "method_profile": {
+      "title": "Method Profile",
+      "type": "string"
+    },
+    "normalization_basis_mwh_per_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalization Basis Mwh Per Mw"
+    },
+    "parent_run_ids": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Parent Run Ids",
+      "type": "array"
+    },
+    "perturbation_dimension": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PerturbationDimension"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "primary_risk_metric": {
+      "$ref": "#/$defs/RiskMetric"
+    },
+    "random_seed": {
+      "title": "Random Seed",
+      "type": "integer"
+    },
+    "run_config_schema_version": {
+      "const": "1.2",
+      "default": "1.2",
+      "title": "Run Config Schema Version",
+      "type": "string"
+    },
+    "run_mode": {
+      "$ref": "#/$defs/RunMode"
+    },
+    "run_type": {
+      "$ref": "#/$defs/RunType"
+    },
+    "scenario_bank_id": {
+      "title": "Scenario Bank Id",
+      "type": "string"
+    },
+    "scenario_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Id"
+    },
+    "soc_year_boundary_mode": {
+      "$ref": "#/$defs/SocYearBoundaryMode"
+    },
+    "source_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Run Id"
+    },
+    "storage_soc_initialization_mode": {
+      "$ref": "#/$defs/StorageSocInitializationMode"
+    },
+    "weather_year_weight_set_id": {
+      "title": "Weather Year Weight Set Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_mode",
+    "run_type",
+    "method_profile",
+    "primary_risk_metric",
+    "weather_year_weight_set_id",
+    "chronology_mode",
+    "storage_soc_initialization_mode",
+    "soc_year_boundary_mode",
+    "capacity_value_type",
+    "allocation_type",
+    "random_seed",
+    "scenario_bank_id",
+    "adequacy_config"
+  ],
+  "title": "run-config-1.2.json",
+  "type": "object",
+  "x-contract-version": "1.2"
+}

@@ -1,0 +1,174 @@
+{
+  "$defs": {
+    "Calendar": {
+      "description": "Calendar (data contract V0.3 §3.1).",
+      "enum": [
+        "gregorian"
+      ],
+      "title": "Calendar",
+      "type": "string"
+    },
+    "DataGrade": {
+      "description": "Data grade machine values (data contract V0.3 §8.1).",
+      "enum": [
+        "G0_teaching",
+        "G1_preliminary",
+        "G2_research",
+        "G3_rule_support"
+      ],
+      "title": "DataGrade",
+      "type": "string"
+    },
+    "IntervalLabel": {
+      "description": "Interval label; standard layer uses hour start (data contract V0.3 §5.3).",
+      "enum": [
+        "hour_start"
+      ],
+      "title": "IntervalLabel",
+      "type": "string"
+    },
+    "LoadBasis": {
+      "description": "Load basis (data contract V0.3 §3.2).",
+      "enum": [
+        "generation_side_net",
+        "generation_side_gross",
+        "consumption_side",
+        "unknown"
+      ],
+      "title": "LoadBasis",
+      "type": "string"
+    },
+    "SystemBoundary": {
+      "description": "System boundary (data contract V0.3 §3.2).",
+      "enum": [
+        "single_area",
+        "single_area_with_ties",
+        "multi_area_reserved"
+      ],
+      "title": "SystemBoundary",
+      "type": "string"
+    },
+    "TimeResolution": {
+      "description": "Time resolution (data contract V0.3 §3.1; first version only ``1h``).",
+      "enum": [
+        "1h"
+      ],
+      "title": "TimeResolution",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/dataset-manifest-1.0.0-draft.3.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Standard dataset manifest (``dataset_manifest.yaml``).",
+  "properties": {
+    "calendar": {
+      "$ref": "#/$defs/Calendar"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "created_by": {
+      "title": "Created By",
+      "type": "string"
+    },
+    "dataset_id": {
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "declared_data_grade": {
+      "$ref": "#/$defs/DataGrade"
+    },
+    "energy_unit": {
+      "const": "MWh",
+      "title": "Energy Unit",
+      "type": "string"
+    },
+    "interval_label": {
+      "$ref": "#/$defs/IntervalLabel"
+    },
+    "load_basis": {
+      "$ref": "#/$defs/LoadBasis"
+    },
+    "power_unit": {
+      "const": "MW",
+      "title": "Power Unit",
+      "type": "string"
+    },
+    "project_id": {
+      "title": "Project Id",
+      "type": "string"
+    },
+    "project_name": {
+      "title": "Project Name",
+      "type": "string"
+    },
+    "region_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Region Ids",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0-draft.3",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_ledger_file": {
+      "title": "Source Ledger File",
+      "type": "string"
+    },
+    "system_boundary": {
+      "$ref": "#/$defs/SystemBoundary"
+    },
+    "tables": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Tables",
+      "type": "object"
+    },
+    "time_resolution": {
+      "$ref": "#/$defs/TimeResolution"
+    },
+    "timezone": {
+      "title": "Timezone",
+      "type": "string"
+    },
+    "weather_years": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Weather Years",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "project_id",
+    "dataset_id",
+    "project_name",
+    "region_ids",
+    "system_boundary",
+    "timezone",
+    "time_resolution",
+    "interval_label",
+    "calendar",
+    "weather_years",
+    "declared_data_grade",
+    "power_unit",
+    "energy_unit",
+    "load_basis",
+    "created_at",
+    "created_by",
+    "source_ledger_file",
+    "tables"
+  ],
+  "title": "dataset-manifest-1.0.0-draft.3.json",
+  "type": "object",
+  "x-contract-version": "1.0.0-draft.3"
+}

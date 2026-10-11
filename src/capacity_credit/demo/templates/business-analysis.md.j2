@@ -1,0 +1,123 @@
+# {{ meta.scenario_name }} 业务分析（中文）
+
+> 教学示范（teaching/demo）——本文件所有数值均来自已经通过身份、哈希和一致性校验的
+> T23-A 机器结果与共享 ReportView（mapping_v1 唯一字段语义）；不得作为正式省级容量信用
+> 结论或发布结论。展示数字仅为可读性格式化，精确值见“关键结论字段表”。
+
+## 1. 一句话结论
+
+基准教学系统（{{ meta.thermal_unit_count }}×{{ meta.thermal_unit_capacity_mw|num }} MW CCGT、FOR={{ meta.thermal_for_rate|num }}、非恒定负荷与风电时序、G0_teaching 合成数据）在
+{{ view.primary_risk_metric }}（{{ view.primary_risk_metric_unit }}）口径下：
+
+- 基准风险（base，不接入新增风电）：**{{ view.base_risk|thousands }}** {{ view.primary_risk_metric_unit }}；
+- 候选风险（candidate，接入风电 {{ view.resource_or_portfolio_id }}，额定 {{ view.reference_capacity_mw|num }} MW）：**{{ view.candidate_risk|thousands }}** {{ view.primary_risk_metric_unit }}；
+- 匹配风险（matched，接入认证容量等值常规容量）：**{{ view.matched_risk|thousands }}** {{ view.primary_risk_metric_unit }}；
+- 认证容量（ELCC）：**{{ view.accredited_capacity_mw|thousands }} MW**（参考容量 {{ view.reference_capacity_mw|num }} MW）；
+- 容量信用比例：**{{ view.capacity_credit_fraction|pct }}**（机器值 {{ view.capacity_credit_fraction|num }} 比例）。
+
+## 2. 示范要回答的业务问题
+
+1. 基准电力系统的可靠性水平是多少；
+2. 新增风电后可靠性发生了什么变化；
+3. 该新增风电可以等效替代多少常规容量；
+4. ELCC 或容量信用比例是多少；
+5. 结果采用什么单位和方法；
+6. 结果是否收敛、是否存在不确定性；
+7. 当前结果可用于什么、不能用于什么；
+8. 为什么只是教学示范、不代表省级正式测算；
+9. 未来接入省级数据还需要补充哪些数据和验证。
+
+## 3. 场景与输入假设（非恒定时序）
+
+- 场景：发电侧新增风电资源 ELCC 教学测算（{{ meta.dataset_id }} / {{ meta.data_version_id }}）；
+- 数据：合成教学数据（teaching_synthetic_t24b），确定性生成、固定种子 {{ meta.root_seed }}；
+- **负荷（非恒定，日内+季节双正弦）**：L(h) = {{ meta.load_mean_mw|num }} + {{ meta.load_daily_amp_mw|num }}·cos(2π·((h mod 24) − 18)/24) + {{ meta.load_seasonal_amp_mw|num }}·cos(2π·(h − 4380)/8760) MW，其中 h 为小时序号（0–8759）；晚间 18 时日内峰值、7 月中旬季节峰值，范围约 [{{ meta.load_mean_mw - meta.load_daily_amp_mw - meta.load_seasonal_amp_mw }}，{{ meta.load_mean_mw + meta.load_daily_amp_mw + meta.load_seasonal_amp_mw }}] MW；
+- **风电可用出力（非恒定）**：容量因子 cf(h) = max(0，{{ meta.wind_cf_mean|num }} + {{ meta.wind_cf_daily_amp|num }}·cos(2π·((h mod 24) − 18)/24) − {{ meta.wind_cf_seasonal_amp|num }}·cos(2π·(h − 4380)/8760))，装机 {{ meta.wind_installed_capacity_mw|num }} MW；小时可用出力 = cf(h) × 装机，**逐小时满足 capacity_factor = available_generation_mw / installed_capacity_mw**（正式导入按此校验）；冬夜强、夏午弱，与负荷部分错峰；
+- 机组：{{ meta.thermal_unit_count }}×{{ meta.thermal_unit_capacity_mw|num }} MW CCGT（FOR={{ meta.thermal_for_rate|num }}）；联络线：无；天气年权重：w1（单年等权）；
+- 样本量 {{ meta.samples }}；运行模式 teaching（低样本教学阈值，见收敛配置）；
+- 方法：统一 ELCC 生产路径（import → freeze → scenario_build → run_elcc_pipeline）。
+
+## 4. 基准系统风险（base）
+
+{% set metric_labels = {
+  "lole_days_per_year": "年缺电天数（LOLE）",
+  "lolh_hours_per_year": "年缺电小时（LOLH）",
+  "eue_mwh_per_year": "期望缺供电量（EUE）",
+  "neue_ppm": "缺供电量占比（NEUE）"
+} %}
+| 角色 | 指标 | 展示值 | 单位 |
+|---|---|---|---|
+{% for row in view.adequacy.rows %}| {{ row.role }} | {{ metric_labels.get(row.metric, row.metric) }}（{{ row.metric }}） | {{ row.value|thousands }} | {{ row.unit }} |
+{% endfor %}
+
+基准风险（主指标）：**{{ view.base_risk|thousands }} {{ view.primary_risk_metric_unit }}**。基准系统存在真实的、非全年性的缺电风险：负荷在部分高峰时段超过可用常规容量，其余时段充裕（非全年结构性缺额）。
+
+> **口径说明**：基准 LOLE {% for row in view.adequacy.rows %}{% if row.role == "base" and row.metric == "lole_days_per_year" %}{{ row.value|thousands }}{% endif %}{% endfor %} days/year 是为保证低样本教学场景存在可观测风险而设置的压力型合成结果，未按任何省级可靠性标准校准，不代表真实系统可靠性水平。
+
+## 5. 新增资源后的风险变化（candidate）
+
+候选风险：**{{ view.candidate_risk|thousands }} {{ view.primary_risk_metric_unit }}**（资源：{{ view.resource_or_portfolio_id }}）。风电的逐小时可用出力把部分高峰时段的缺电概率从“需三台全开”降为“需两台或一台”，因此候选风险低于基准风险；但风电在负荷高峰的可用出力有限（容量因子 0–0.8、冬季夜间更强），风险下降幅度小于按额定装机线性外推。
+
+## 6. ELCC / 等效容量和容量信用比例
+
+- 认证容量（ELCC/等效容量）：{{ view.accredited_capacity_mw|thousands }} MW；
+- 参考容量（新增资源额定）：{{ view.reference_capacity_mw|num }} MW；
+- 容量信用比例：展示 {{ view.capacity_credit_fraction|pct }}（机器值 {{ view.capacity_credit_fraction|num }} 比例）；
+- 容量价值类型：{% for f in view.display_fields %}{% if f.field_id == "capacity_value_type" %}{{ f.raw_value }}{% endif %}{% endfor %}；
+- 结果适用性：{% for f in view.display_fields %}{% if f.field_id == "result_applicability" %}{{ f.raw_value }}{% endif %}{% endfor %}。
+
+**为什么 ELCC 不是风电装机容量**：ELCC 是“在等风险意义下可替代的常规可靠容量”。风电出力逐小时波动（本场景容量因子在 0 到约 0.8 之间变化），不能像常规机组那样随时全额调用；等风险搜索只承认风电在风险时段实际提供的可靠性价值，因此认证容量严格小于装机容量（{{ view.accredited_capacity_mw|thousands }} MW < {{ view.reference_capacity_mw|num }} MW），比例由整条时序与负荷的耦合决定，不能由单一恒定风电值直接推导。
+
+## 7. 基准/候选/匹配的通俗解释
+
+- **base（基准）**：不含新增风电的系统风险，是衡量“新增资源前”可靠性的基线；
+- **candidate（候选）**：基准系统接入风电（按小时可用出力参与）后的风险，反映风电的真实贡献；
+- **matched（匹配）**：把认证容量（ELCC）作为 100% 可靠的常规容量加入基准系统后的风险；按正式求解器的等风险定义与容差，matched 风险应接近 base 风险——这既是“等效”的含义，也是搜索收敛的判据；
+- 搜索与收敛状态：风险收敛 {{ view.risk_convergence }} / 搜索收敛 {{ view.search_convergence }}。
+
+## 8. 不确定性和收敛情况
+
+- 搜索/收敛状态：{{ view.risk_convergence }} / {{ view.search_convergence }}（正式求解结果）；
+- 搜索轨迹：已随正式机器结果发布（machine-results/search_trace.csv，trace_status=present，与报告“搜索与收敛”工作表一致）；正式结果状态（{{ view.result_status }}）来自 run_summary.json；内部搜索轨迹与 MethodResult 的状态绑定由正式写入路径（write_machine_outputs 严格校验）验证；
+- 样本量 {{ meta.samples }}（教学阈值，低样本不代表生产级不确定性结论）；
+- 结果状态：{{ view.result_status }}；空值语义按 mapping_v1 四态显示（value/zero/not_applicable/not_computed/not_converged）。
+
+## 9. 关键结论字段表（审计，精确 raw_value）
+
+| field_id | raw_value | display_value | unit | null_status |
+|---|---|---|---|---|
+{% for f in view.display_fields %}| {{ f.field_id }} | {{ f.raw_value if f.raw_value is not none else "" }} | {{ f.display_value }} | {{ f.display_unit or "" }} | {{ f.null_status }} |
+{% endfor %}
+
+## 10. 对规划或容量价值分析的启示
+
+教学场景下风电容量信用比例（{{ view.capacity_credit_fraction|pct }}）
+可用于理解方法逻辑与结果口径；任何规划决策都必须使用经真实数据授权并验证的结果。
+
+## 11. 使用边界
+
+- 使用边界代码：{{ view.use_boundary_code }}；警告：{{ view.use_boundary_warning or "（无）" }}；
+- teaching/demo：本示范为教学性质，结果 experimental/provisional；
+- available：工具能力可运行；verified：仅 P-01/P-02 对照与金标范围；
+- 禁止表述：适用于任意省级系统、储能已通过 PRAS 验证、整个工具已验收、P5/P6 已通过。
+
+## 12. 尚未覆盖的真实省级问题
+
+真实负荷与风电时序、多天气年权重、真实机组与检修计划、联络线约束、储能与水电、
+多区域耦合、真实政策与成本参数——均未在本示范中覆盖。
+
+## 13. 未来省级测算所需数据清单
+
+经授权的真实负荷时序、风电/光伏出力时序与装机、机组参数与可靠性、检修计划、
+联络线/区域边界、天气年权重、可靠性标准与政策参数、数据质量与等级记录。
+
+## 14. 成果物索引和复现命令
+
+- 输入快照：input/（data/ 教学输入 CSV + demo-config.yaml 冻结快照 + README 输入说明）；
+- 机器结果：machine-results/（T23-A 七项，含 search_trace.csv）；
+- 报告：report.xlsx、report.html、report_export_manifest.json；
+- 业务分析：本文件；清单：artifact-manifest.json（逐项路径/大小/SHA-256 + 复现身份）；
+- 复现（与本次运行实际 config/output 一致）：`{{ meta.repro_command }}`
+
+生成时间：{{ meta.generated_at_utc }}；run_id：{{ view.run_id }}；result_id：{{ view.result_id }}；
+软件版本：{{ meta.software_version }}；代码身份：{{ meta.software_commit }}。

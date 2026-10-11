@@ -1,0 +1,14 @@
+# Development and quality-gate tools (installed from the generated lock file).
+#
+# pip-tools 7.6.0 (latest) imports pip._internal.utils.compat.stdlib_pkgs,
+# removed in pip 26; keep pip<26 so the locked pip works with pip-tools.
+
+hypothesis
+jsonschema
+mypy
+pandas-stubs
+pip<26
+pip-tools
+pytest
+ruff
+types-PyYAML

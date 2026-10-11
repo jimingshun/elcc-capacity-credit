@@ -1,0 +1,6 @@
+# Reporting output dependencies (installed from the generated lock file).
+
+jinja2
+openpyxl
+plotly
+xlsxwriter

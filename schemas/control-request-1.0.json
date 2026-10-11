@@ -1,0 +1,98 @@
+{
+  "additionalProperties": false,
+  "description": "One atomic lifecycle control request (strict contract).",
+  "properties": {
+    "action": {
+      "enum": [
+        "start",
+        "resume",
+        "stop_safely"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "control_schema_version": {
+      "const": "1.0",
+      "title": "Control Schema Version",
+      "type": "string"
+    },
+    "diagnostics": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Diagnostics",
+      "type": "array"
+    },
+    "expected_lifecycle_status": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Expected Lifecycle Status"
+    },
+    "request_id": {
+      "title": "Request Id",
+      "type": "string"
+    },
+    "request_status": {
+      "default": "pending",
+      "enum": [
+        "pending",
+        "accepted",
+        "rejected",
+        "completed"
+      ],
+      "title": "Request Status",
+      "type": "string"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "title": "Requested At",
+      "type": "string"
+    },
+    "requested_by": {
+      "title": "Requested By",
+      "type": "string"
+    },
+    "result": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Result"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Run Id"
+    }
+  },
+  "required": [
+    "control_schema_version",
+    "request_id",
+    "action",
+    "requested_by",
+    "requested_at"
+  ],
+  "title": "ControlRequest",
+  "type": "object"
+}

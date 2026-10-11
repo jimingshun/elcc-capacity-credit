@@ -1,0 +1,2747 @@
+{
+  "$defs": {
+    "AllocationType": {
+      "description": "Allocation of capacity value results (methodology V0.4 §11.3).",
+      "enum": [
+        "none",
+        "governance_rule"
+      ],
+      "title": "AllocationType",
+      "type": "string"
+    },
+    "AssessmentAnchor": {
+      "description": "MRI/rMRI assessment anchor (methodology V0.4 §7.4).",
+      "enum": [
+        "current_system",
+        "calibrated_standard"
+      ],
+      "title": "AssessmentAnchor",
+      "type": "string"
+    },
+    "CapacityValueType": {
+      "description": "Capacity value types (methodology V0.4 §11).",
+      "enum": [
+        "average",
+        "marginal",
+        "portfolio",
+        "not_applicable"
+      ],
+      "title": "CapacityValueType",
+      "type": "string"
+    },
+    "ChronologyMode": {
+      "description": "Time-series organisation mode (methodology V0.4 §6.3).",
+      "enum": [
+        "independent_weather_years",
+        "continuous_multiyear"
+      ],
+      "title": "ChronologyMode",
+      "type": "string"
+    },
+    "DataGrade": {
+      "description": "Data grade machine values (data contract V0.3 §8.1).",
+      "enum": [
+        "G0_teaching",
+        "G1_preliminary",
+        "G2_research",
+        "G3_rule_support"
+      ],
+      "title": "DataGrade",
+      "type": "string"
+    },
+    "Diagnostic": {
+      "additionalProperties": false,
+      "description": "Structured diagnostic entry (methodology V0.4 §15.2).",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "Diagnostic",
+      "type": "object"
+    },
+    "InterpolationMethod": {
+      "description": "Search interpolation method.\n\nThe methodology sample contract (V0.4 §16) documents\n``not_applicable``; the chord interpolation machine value\n(methodology V0.4 §8.4) is frozen at ``chord`` by the T11\npre-requisite contract resolution (T02 contract-validation report\nerratum). No synonym machine values (linear, secant, ...) exist.",
+      "enum": [
+        "not_applicable",
+        "chord"
+      ],
+      "title": "InterpolationMethod",
+      "type": "string"
+    },
+    "Method": {
+      "description": "Unified result method (methodology V0.4 §16).",
+      "enum": [
+        "adequacy",
+        "elcc",
+        "efc",
+        "mri",
+        "rmri",
+        "demand_target_capacity"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "PerturbationDimension": {
+      "description": "MRI perturbation dimension (methodology V0.4 §10.1).",
+      "enum": [
+        "fixed_duration",
+        "power_only",
+        "energy_only",
+        "custom_vector"
+      ],
+      "title": "PerturbationDimension",
+      "type": "string"
+    },
+    "ResultStatus": {
+      "description": "Overall method-result validity (methodology V0.4 §15.1).",
+      "enum": [
+        "valid",
+        "valid_with_warning",
+        "low_resolution",
+        "not_converged",
+        "invalid_method",
+        "invalid_data"
+      ],
+      "title": "ResultStatus",
+      "type": "string"
+    },
+    "RiskConvergence": {
+      "description": "Risk-estimate convergence status (methodology V0.4 §15.1).",
+      "enum": [
+        "converged",
+        "not_converged",
+        "low_event_count"
+      ],
+      "title": "RiskConvergence",
+      "type": "string"
+    },
+    "RiskMetric": {
+      "description": "Primary risk metric machine values (methodology V0.4 §3.4).",
+      "enum": [
+        "lole_days_per_year",
+        "lolh_hours_per_year",
+        "eue_mwh_per_year",
+        "neue_ppm"
+      ],
+      "title": "RiskMetric",
+      "type": "string"
+    },
+    "RiskMetrics": {
+      "additionalProperties": false,
+      "description": "Risk metrics by role: base / candidate / matched.",
+      "properties": {
+        "base": {
+          "$ref": "#/$defs/RiskRole"
+        },
+        "candidate": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RiskRole"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "matched": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RiskRole"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "base"
+      ],
+      "title": "RiskMetrics",
+      "type": "object"
+    },
+    "RiskRole": {
+      "additionalProperties": false,
+      "description": "Four risk metrics for one role (methodology V0.4 §16).",
+      "properties": {
+        "eue_mwh_per_year": {
+          "title": "Eue Mwh Per Year",
+          "type": "number"
+        },
+        "lole_days_per_year": {
+          "title": "Lole Days Per Year",
+          "type": "number"
+        },
+        "lolh_hours_per_year": {
+          "title": "Lolh Hours Per Year",
+          "type": "number"
+        },
+        "neue_ppm": {
+          "title": "Neue Ppm",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lole_days_per_year",
+        "lolh_hours_per_year",
+        "eue_mwh_per_year",
+        "neue_ppm"
+      ],
+      "title": "RiskRole",
+      "type": "object"
+    },
+    "RmriStatus": {
+      "description": "rMRI status (methodology V0.4 §16 / V0.8 §16A.1).\n\nThe T18-0 contract freeze (methodology §16A.1) fixes the minimal\nstate set to ``not_applicable`` / ``stable`` / ``unstable``; specific\ninstability reasons are carried by structured diagnostic codes, never\nby additional state enum values.",
+      "enum": [
+        "not_applicable",
+        "stable",
+        "unstable"
+      ],
+      "title": "RmriStatus",
+      "type": "string"
+    },
+    "ScenarioBirthCertificate": {
+      "additionalProperties": false,
+      "description": "R3-B3: the FOUR scenario design variables of one capacity-value\nrun (方法说明第四章(三)), carried WITH the result as its birth\ncertificate - results with different values are different calibers\nand must never be mixed (第八章风险1).\n\ncaliber: the marginal/average calibre (capacity_value_type value);\nincrement_mw: the connected capacity (delta calibre MUST declare it);\nplacement: aggregate system-wide in the single-area model (multi-area\nis reserved and must extend this literal when implemented);\ncomposition: individual vs combination access, with the resolved\nmember ids (combination results carry interaction effects).",
+      "properties": {
+        "caliber": {
+          "title": "Caliber",
+          "type": "string"
+        },
+        "composition_mode": {
+          "enum": [
+            "individual",
+            "combination"
+          ],
+          "title": "Composition Mode",
+          "type": "string"
+        },
+        "increment_mw": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Increment Mw"
+        },
+        "member_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Member Ids",
+          "type": "array"
+        },
+        "placement": {
+          "const": "system_wide",
+          "title": "Placement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "caliber",
+        "placement",
+        "composition_mode"
+      ],
+      "title": "ScenarioBirthCertificate",
+      "type": "object"
+    },
+    "SearchConvergence": {
+      "description": "Equal-risk search convergence status (methodology V0.4 §15.1).",
+      "enum": [
+        "converged",
+        "bracket_only",
+        "plateau_unresolved",
+        "not_converged",
+        "not_applicable"
+      ],
+      "title": "SearchConvergence",
+      "type": "string"
+    },
+    "Severity": {
+      "description": "Diagnostic severity (methodology V0.4 §15.2; data contract V0.3 §24).",
+      "enum": [
+        "info",
+        "warning",
+        "error"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "SocYearBoundaryMode": {
+      "description": "SOC year-boundary mode (methodology V0.4 §6.3).",
+      "enum": [
+        "carry_over",
+        "reinitialize_with_configured_mode",
+        "not_applicable"
+      ],
+      "title": "SocYearBoundaryMode",
+      "type": "string"
+    },
+    "StorageSocInitializationMode": {
+      "description": "SOC initialization mode (methodology V0.4 §6.3).",
+      "enum": [
+        "weather_cycle_warmup",
+        "stochastic_sample_burnin",
+        "not_applicable"
+      ],
+      "title": "StorageSocInitializationMode",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/method-result-1.3.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "adequacy"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "allocation_rule_id": {
+            "type": "null"
+          },
+          "allocation_type": {
+            "const": "none"
+          },
+          "anchor_calibration_method": {
+            "type": "null"
+          },
+          "anchor_risk_metric": {
+            "type": "null"
+          },
+          "anchor_risk_value": {
+            "type": "null"
+          },
+          "anchor_standard_source_id": {
+            "type": "null"
+          },
+          "assessment_anchor": {
+            "type": "null"
+          },
+          "baseline_portfolio_version": {
+            "type": "null"
+          },
+          "candidate_risk": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "capacity_value_type": {
+            "const": "not_applicable"
+          },
+          "empirical_risk_resolution": {
+            "type": "null"
+          },
+          "interpolation_method": {
+            "const": "not_applicable"
+          },
+          "matched_risk": {
+            "type": "null"
+          },
+          "normalization_basis_mwh_per_mw": {
+            "type": "null"
+          },
+          "perturbation_dimension": {
+            "type": "null"
+          },
+          "perturbation_vector": {
+            "type": "null"
+          },
+          "reference_capacity_mw": {
+            "type": "null"
+          },
+          "resource_or_portfolio_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "risk_difference": {
+            "type": "null"
+          },
+          "risk_metrics": {
+            "properties": {
+              "candidate": {
+                "type": "null"
+              },
+              "matched": {
+                "type": "null"
+              }
+            }
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          },
+          "search_bracket_high_mw": {
+            "type": "null"
+          },
+          "search_bracket_high_risk": {
+            "type": "null"
+          },
+          "search_bracket_low_mw": {
+            "type": "null"
+          },
+          "search_bracket_low_risk": {
+            "type": "null"
+          },
+          "search_convergence": {
+            "const": "not_applicable"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "enum": [
+              "mri",
+              "rmri"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "assessment_anchor": {
+            "enum": [
+              "current_system",
+              "calibrated_standard"
+            ]
+          },
+          "perturbation_dimension": {
+            "enum": [
+              "fixed_duration",
+              "power_only",
+              "energy_only",
+              "custom_vector"
+            ]
+          }
+        },
+        "required": [
+          "assessment_anchor",
+          "anchor_risk_metric",
+          "anchor_risk_value",
+          "anchor_calibration_method",
+          "perturbation_dimension"
+        ]
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "method": {
+              "enum": [
+                "mri",
+                "rmri"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "assessment_anchor": {
+            "type": "null"
+          },
+          "perturbation_dimension": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assessment_anchor": {
+            "const": "calibrated_standard"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "anchor_standard_source_id": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "anchor_standard_source_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "assessment_anchor": {
+            "const": "current_system"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "anchor_standard_source_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "capacity_value_type": {
+            "const": "marginal"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "baseline_portfolio_version": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "baseline_portfolio_version"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "allocation_type": {
+            "const": "governance_rule"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "allocation_rule_id": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "allocation_rule_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "enum": [
+              "elcc",
+              "efc"
+            ]
+          }
+        }
+      },
+      "then": {
+        "allOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "not_converged"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "valid"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "valid_with_warning"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_applicable"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_applicable"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "not_converged"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "not_converged"
+                  },
+                  "risk_convergence": {
+                    "const": "converged"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "low_resolution"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "not_applicable"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "not_applicable"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "not_converged"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "low_resolution"
+                  },
+                  "risk_convergence": {
+                    "const": "low_event_count"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "not_converged"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "bracket_only"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_applicable"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_applicable"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "not_converged"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "not_converged"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_data"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "invalid_method"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "result_status": {
+                    "const": "not_converged"
+                  },
+                  "risk_convergence": {
+                    "const": "not_converged"
+                  },
+                  "search_convergence": {
+                    "const": "plateau_unresolved"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "properties": {
+              "diagnostics": {
+                "items": {
+                  "anyOf": [
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "BASELINE_NOT_CALIBRATED"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ24_ENERGY_CAPACITY_INVALID"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ24_SOC_FRACTION_RANGE"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ24_USABLE_ENERGY_MISMATCH"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ27_DOUBLE_COUNT"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ27_INVALID_FLAG"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ27_INVALID_RATE"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ27_INVALID_RESOURCE_ID"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ27_ORPHAN_OUTAGE"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ27_RATE_CONSISTENCY_ONLY"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_DUPLICATE_MAPPING"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_INVALID_ALIGNMENT"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_INVALID_LEAP_RULE"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_INVALID_SCOPE"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_INVALID_TARGET_YEAR"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_INVALID_WEATHER_YEAR"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_MISSING_ALIGNMENT"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_MISSING_INTERTIE_ID"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "DQ30_MISSING_SCOPE"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "EFC_CI_NOT_AVAILABLE"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "EFC_MATCHED_POINT_NOT_CONVERGED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "EFC_MATCHED_POINT_OUTSIDE_TOLERANCE"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "EFC_TECHNOLOGY_CLASS_MISSING"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "EFC_UPPER_BOUND_TOUCHED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "EFC_WINTER_WINDOW_PROVISIONAL"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "ELCC_BRACKET_EXPANDED"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "ELCC_CI_NOT_AVAILABLE"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "ELCC_DATA_UNUSABLE"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "ELCC_INTERPOLATION_UNRESOLVED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "ELCC_MATCHED_POINT_NOT_CONVERGED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "ELCC_MATCHED_POINT_OUTSIDE_TOLERANCE"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "INTERTIE_EXTRA_IMPORT_CAPPED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "INTERTIE_PLAN_ZEROED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "RISK_EVENT_COUNT_LOW"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEARCH_BRACKET_NOT_FORMED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEARCH_EXTENSION_NO_GENERATION_CHANGE"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEARCH_MAX_ITERATIONS"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEARCH_MONOTONIC_UNRESOLVED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEARCH_NOT_MONOTONIC"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEARCH_RISK_NOT_CONVERGED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEARCH_RISK_RESOLUTION_UNAVAILABLE"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEARCH_SAMPLE_GENERATION_UNSTABLE"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SEED_REPLICATION_GATE_MISSING"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "SINGLE_WEATHER_YEAR"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "STORAGE_CROSS_CHARGING_ATTEMPT"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "STORAGE_CROSS_CHARGING_BLOCKED"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "STORAGE_PERFECT_FORESIGHT"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "STORAGE_SOC_BURNIN_UNSTABLE"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "STORAGE_SOC_FAST_WARMUP"
+                        },
+                        "severity": {
+                          "const": "info"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "STORAGE_SOC_INVALID"
+                        },
+                        "severity": {
+                          "const": "error"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "STORAGE_SOC_WARMUP_NOT_CONVERGED"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    },
+                    {
+                      "properties": {
+                        "code": {
+                          "const": "THERMAL_DURATION_UNAVAILABLE"
+                        },
+                        "severity": {
+                          "const": "warning"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result_status": {
+                  "enum": [
+                    "valid",
+                    "valid_with_warning"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "accredited_capacity_mw": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "interpolation_method": {
+                  "not": {
+                    "const": "not_applicable"
+                  }
+                },
+                "matched_risk": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "risk_difference": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "risk_metrics": {
+                  "properties": {
+                    "matched": {
+                      "not": {
+                        "type": "null"
+                      }
+                    }
+                  },
+                  "required": [
+                    "matched"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result_status": {
+                  "const": "valid"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "diagnostics": {
+                  "not": {
+                    "contains": {
+                      "properties": {
+                        "severity": {
+                          "enum": [
+                            "warning",
+                            "error"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result_status": {
+                  "const": "valid_with_warning"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "diagnostics": {
+                  "contains": {
+                    "properties": {
+                      "severity": {
+                        "const": "warning"
+                      }
+                    }
+                  },
+                  "not": {
+                    "contains": {
+                      "properties": {
+                        "severity": {
+                          "const": "error"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result_status": {
+                  "enum": [
+                    "not_converged",
+                    "low_resolution"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "accredited_capacity_mw": {
+                  "type": "null"
+                },
+                "capacity_credit_fraction": {
+                  "type": "null"
+                },
+                "diagnostics": {
+                  "not": {
+                    "contains": {
+                      "properties": {
+                        "severity": {
+                          "const": "error"
+                        }
+                      }
+                    }
+                  }
+                },
+                "interpolation_method": {
+                  "const": "not_applicable"
+                },
+                "matched_risk": {
+                  "type": "null"
+                },
+                "risk_difference": {
+                  "type": "null"
+                },
+                "risk_metrics": {
+                  "properties": {
+                    "matched": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result_status": {
+                  "const": "invalid_method"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "accredited_capacity_mw": {
+                  "type": "null"
+                },
+                "capacity_credit_fraction": {
+                  "type": "null"
+                },
+                "diagnostics": {
+                  "contains": {
+                    "properties": {
+                      "code": {
+                        "enum": [
+                          "SEARCH_NOT_MONOTONIC",
+                          "SEARCH_SAMPLE_GENERATION_UNSTABLE",
+                          "STORAGE_CROSS_CHARGING_ATTEMPT"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  },
+                  "not": {
+                    "contains": {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "DQ24_ENERGY_CAPACITY_INVALID",
+                            "DQ24_SOC_FRACTION_RANGE",
+                            "DQ24_USABLE_ENERGY_MISMATCH",
+                            "DQ27_DOUBLE_COUNT",
+                            "DQ27_INVALID_FLAG",
+                            "DQ27_INVALID_RATE",
+                            "DQ27_INVALID_RESOURCE_ID",
+                            "DQ27_ORPHAN_OUTAGE",
+                            "DQ30_DUPLICATE_MAPPING",
+                            "DQ30_INVALID_ALIGNMENT",
+                            "DQ30_INVALID_LEAP_RULE",
+                            "DQ30_INVALID_SCOPE",
+                            "DQ30_INVALID_TARGET_YEAR",
+                            "DQ30_INVALID_WEATHER_YEAR",
+                            "DQ30_MISSING_ALIGNMENT",
+                            "DQ30_MISSING_INTERTIE_ID",
+                            "DQ30_MISSING_SCOPE",
+                            "ELCC_DATA_UNUSABLE",
+                            "STORAGE_SOC_INVALID"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  }
+                },
+                "interpolation_method": {
+                  "const": "not_applicable"
+                },
+                "matched_risk": {
+                  "type": "null"
+                },
+                "risk_difference": {
+                  "type": "null"
+                },
+                "risk_metrics": {
+                  "properties": {
+                    "matched": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "result_status": {
+                  "const": "invalid_data"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "accredited_capacity_mw": {
+                  "type": "null"
+                },
+                "capacity_credit_fraction": {
+                  "type": "null"
+                },
+                "diagnostics": {
+                  "contains": {
+                    "properties": {
+                      "code": {
+                        "enum": [
+                          "DQ24_ENERGY_CAPACITY_INVALID",
+                          "DQ24_SOC_FRACTION_RANGE",
+                          "DQ24_USABLE_ENERGY_MISMATCH",
+                          "DQ27_DOUBLE_COUNT",
+                          "DQ27_INVALID_FLAG",
+                          "DQ27_INVALID_RATE",
+                          "DQ27_INVALID_RESOURCE_ID",
+                          "DQ27_ORPHAN_OUTAGE",
+                          "DQ30_DUPLICATE_MAPPING",
+                          "DQ30_INVALID_ALIGNMENT",
+                          "DQ30_INVALID_LEAP_RULE",
+                          "DQ30_INVALID_SCOPE",
+                          "DQ30_INVALID_TARGET_YEAR",
+                          "DQ30_INVALID_WEATHER_YEAR",
+                          "DQ30_MISSING_ALIGNMENT",
+                          "DQ30_MISSING_INTERTIE_ID",
+                          "DQ30_MISSING_SCOPE",
+                          "ELCC_DATA_UNUSABLE",
+                          "STORAGE_SOC_INVALID"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  },
+                  "not": {
+                    "contains": {
+                      "properties": {
+                        "code": {
+                          "enum": [
+                            "SEARCH_NOT_MONOTONIC",
+                            "SEARCH_SAMPLE_GENERATION_UNSTABLE",
+                            "STORAGE_CROSS_CHARGING_ATTEMPT"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "code"
+                      ]
+                    }
+                  }
+                },
+                "empirical_risk_resolution": {
+                  "type": "null"
+                },
+                "interpolation_method": {
+                  "const": "not_applicable"
+                },
+                "matched_risk": {
+                  "type": "null"
+                },
+                "risk_difference": {
+                  "type": "null"
+                },
+                "risk_metrics": {
+                  "properties": {
+                    "matched": {
+                      "type": "null"
+                    }
+                  }
+                },
+                "search_bracket_high_mw": {
+                  "type": "null"
+                },
+                "search_bracket_high_risk": {
+                  "type": "null"
+                },
+                "search_bracket_low_mw": {
+                  "type": "null"
+                },
+                "search_bracket_low_risk": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "description": "Unified result for adequacy / elcc / efc / mri / rmri, Schema 1.3.",
+  "properties": {
+    "accredited_capacity_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Accredited Capacity Mw"
+    },
+    "allocation_rule_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Allocation Rule Id"
+    },
+    "allocation_type": {
+      "$ref": "#/$defs/AllocationType"
+    },
+    "anchor_calibration_method": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Anchor Calibration Method"
+    },
+    "anchor_risk_metric": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RiskMetric"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "anchor_risk_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Anchor Risk Value"
+    },
+    "anchor_standard_source_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Anchor Standard Source Id"
+    },
+    "assessment_anchor": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AssessmentAnchor"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "auction_round": {
+      "anyOf": [
+        {
+          "enum": [
+            "T4",
+            "T1",
+            "none"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Auction Round"
+    },
+    "base_risk": {
+      "title": "Base Risk",
+      "type": "number"
+    },
+    "baseline_portfolio_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Baseline Portfolio Version"
+    },
+    "candidate_risk": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Candidate Risk"
+    },
+    "capacity_credit_fraction": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Capacity Credit Fraction"
+    },
+    "capacity_value_type": {
+      "$ref": "#/$defs/CapacityValueType"
+    },
+    "chronology_mode": {
+      "$ref": "#/$defs/ChronologyMode"
+    },
+    "confidence_level": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Confidence Level"
+    },
+    "criterion_mode": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Criterion Mode"
+    },
+    "delivery_year": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Delivery Year"
+    },
+    "diagnostics": {
+      "items": {
+        "$ref": "#/$defs/Diagnostic"
+      },
+      "title": "Diagnostics",
+      "type": "array"
+    },
+    "effective_data_grade": {
+      "$ref": "#/$defs/DataGrade"
+    },
+    "empirical_risk_resolution": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Empirical Risk Resolution"
+    },
+    "interpolation_method": {
+      "$ref": "#/$defs/InterpolationMethod"
+    },
+    "load_scale_factor": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Load Scale Factor"
+    },
+    "lower_ci": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lower Ci"
+    },
+    "matched_risk": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Matched Risk"
+    },
+    "method": {
+      "$ref": "#/$defs/Method"
+    },
+    "method_profile": {
+      "title": "Method Profile",
+      "type": "string"
+    },
+    "normalization_basis_mwh_per_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalization Basis Mwh Per Mw"
+    },
+    "perturbation_dimension": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PerturbationDimension"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "perturbation_vector": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Perturbation Vector"
+    },
+    "primary_risk_metric": {
+      "$ref": "#/$defs/RiskMetric"
+    },
+    "reference_capacity_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reference Capacity Mw"
+    },
+    "resource_or_portfolio_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resource Or Portfolio Id"
+    },
+    "result_id": {
+      "format": "uuid",
+      "title": "Result Id",
+      "type": "string"
+    },
+    "result_schema_version": {
+      "const": "1.3",
+      "title": "Result Schema Version",
+      "type": "string"
+    },
+    "result_status": {
+      "$ref": "#/$defs/ResultStatus"
+    },
+    "risk_convergence": {
+      "$ref": "#/$defs/RiskConvergence"
+    },
+    "risk_difference": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Risk Difference"
+    },
+    "risk_metrics": {
+      "$ref": "#/$defs/RiskMetrics"
+    },
+    "rmri_status": {
+      "$ref": "#/$defs/RmriStatus"
+    },
+    "run_id": {
+      "format": "uuid",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sample_count": {
+      "minimum": 0,
+      "title": "Sample Count",
+      "type": "integer"
+    },
+    "scenario_bank_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Bank Id"
+    },
+    "scenario_birth_certificate": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ScenarioBirthCertificate"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "search_bracket_high_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Search Bracket High Mw"
+    },
+    "search_bracket_high_risk": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Search Bracket High Risk"
+    },
+    "search_bracket_low_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Search Bracket Low Mw"
+    },
+    "search_bracket_low_risk": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Search Bracket Low Risk"
+    },
+    "search_convergence": {
+      "$ref": "#/$defs/SearchConvergence"
+    },
+    "soc_year_boundary_mode": {
+      "$ref": "#/$defs/SocYearBoundaryMode"
+    },
+    "solver_caliber": {
+      "anyOf": [
+        {
+          "enum": [
+            "adjust_perfect_capacity",
+            "adjust_load"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Solver Caliber"
+    },
+    "source_project_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Project Ref"
+    },
+    "source_result_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Result Id"
+    },
+    "source_run_ref": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Run Ref"
+    },
+    "storage_soc_initialization_mode": {
+      "$ref": "#/$defs/StorageSocInitializationMode"
+    },
+    "target_risk_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Target Risk Value"
+    },
+    "technology_class": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Technology Class"
+    },
+    "upper_ci": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Upper Ci"
+    }
+  },
+  "required": [
+    "result_schema_version",
+    "result_id",
+    "run_id",
+    "method",
+    "method_profile",
+    "capacity_value_type",
+    "allocation_type",
+    "chronology_mode",
+    "storage_soc_initialization_mode",
+    "soc_year_boundary_mode",
+    "rmri_status",
+    "primary_risk_metric",
+    "risk_metrics",
+    "base_risk",
+    "interpolation_method",
+    "sample_count",
+    "result_status",
+    "risk_convergence",
+    "search_convergence",
+    "effective_data_grade"
+  ],
+  "title": "method-result-1.3.json",
+  "type": "object",
+  "x-contract-version": "1.3"
+}

@@ -1,0 +1,3187 @@
+{
+  "$defs": {
+    "AllocationType": {
+      "description": "Allocation of capacity value results (methodology V0.4 §11.3).",
+      "enum": [
+        "none",
+        "governance_rule"
+      ],
+      "title": "AllocationType",
+      "type": "string"
+    },
+    "AssessmentAnchor": {
+      "description": "MRI/rMRI assessment anchor (methodology V0.4 §7.4).",
+      "enum": [
+        "current_system",
+        "calibrated_standard"
+      ],
+      "title": "AssessmentAnchor",
+      "type": "string"
+    },
+    "CapacityValueType": {
+      "description": "Capacity value types (methodology V0.4 §11).",
+      "enum": [
+        "average",
+        "marginal",
+        "portfolio",
+        "not_applicable"
+      ],
+      "title": "CapacityValueType",
+      "type": "string"
+    },
+    "ChronologyMode": {
+      "description": "Time-series organisation mode (methodology V0.4 §6.3).",
+      "enum": [
+        "independent_weather_years",
+        "continuous_multiyear"
+      ],
+      "title": "ChronologyMode",
+      "type": "string"
+    },
+    "CustomPerturbationComponent": {
+      "additionalProperties": false,
+      "description": "One custom-vector component with an explicit physical unit\n(method-result 2.0 ``custom_components`` / run-config 1.1\n``custom_perturbation_vector.components``). A frozen structured\ncomponent - never an unlabelled ``Any`` dict.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "power_mw",
+            "energy_mwh",
+            "other"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "unit": {
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "role",
+        "name",
+        "value",
+        "unit"
+      ],
+      "title": "CustomPerturbationComponent",
+      "type": "object"
+    },
+    "DataGrade": {
+      "description": "Data grade machine values (data contract V0.3 §8.1).",
+      "enum": [
+        "G0_teaching",
+        "G1_preliminary",
+        "G2_research",
+        "G3_rule_support"
+      ],
+      "title": "DataGrade",
+      "type": "string"
+    },
+    "Diagnostic": {
+      "additionalProperties": false,
+      "description": "Structured diagnostic entry (methodology V0.4 §15.2).",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "message"
+      ],
+      "title": "Diagnostic",
+      "type": "object"
+    },
+    "DifferenceScheme": {
+      "description": "MRI finite-difference scheme (methodology §16A.4). ``difference_scheme``\nin run-config is the REQUESTED scheme; each step evaluation records the\nAPPLIED scheme separately.",
+      "enum": [
+        "forward",
+        "central"
+      ],
+      "title": "DifferenceScheme",
+      "type": "string"
+    },
+    "Method": {
+      "description": "Unified result method (methodology V0.4 §16).",
+      "enum": [
+        "adequacy",
+        "elcc",
+        "efc",
+        "mri",
+        "rmri",
+        "demand_target_capacity"
+      ],
+      "title": "Method",
+      "type": "string"
+    },
+    "PerturbationDimension": {
+      "description": "MRI perturbation dimension (methodology V0.4 §10.1).",
+      "enum": [
+        "fixed_duration",
+        "power_only",
+        "energy_only",
+        "custom_vector"
+      ],
+      "title": "PerturbationDimension",
+      "type": "string"
+    },
+    "PerturbationVector": {
+      "additionalProperties": false,
+      "description": "method-result 2.0 structured perturbation vector (§16A.3).\n\n``custom_components`` is a verifiable structured list of applied\ncomponent deltas (name / role / value / unit) - never a bare\n``dict[str, Any]``.",
+      "properties": {
+        "custom_components": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/CustomPerturbationComponent"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Custom Components"
+        },
+        "delta_energy_mwh": {
+          "default": 0.0,
+          "title": "Delta Energy Mwh",
+          "type": "number"
+        },
+        "delta_power_mw": {
+          "default": 0.0,
+          "title": "Delta Power Mw",
+          "type": "number"
+        },
+        "dimension": {
+          "$ref": "#/$defs/PerturbationDimension"
+        },
+        "duration_after_h": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration After H"
+        },
+        "duration_before_h": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Duration Before H"
+        },
+        "scalar_step": {
+          "title": "Scalar Step",
+          "type": "number"
+        }
+      },
+      "required": [
+        "dimension",
+        "scalar_step"
+      ],
+      "title": "PerturbationVector",
+      "type": "object"
+    },
+    "ResultStatus": {
+      "description": "Overall method-result validity (methodology V0.4 §15.1).",
+      "enum": [
+        "valid",
+        "valid_with_warning",
+        "low_resolution",
+        "not_converged",
+        "invalid_method",
+        "invalid_data"
+      ],
+      "title": "ResultStatus",
+      "type": "string"
+    },
+    "RiskConvergence": {
+      "description": "Risk-estimate convergence status (methodology V0.4 §15.1).",
+      "enum": [
+        "converged",
+        "not_converged",
+        "low_event_count"
+      ],
+      "title": "RiskConvergence",
+      "type": "string"
+    },
+    "RiskMetric": {
+      "description": "Primary risk metric machine values (methodology V0.4 §3.4).",
+      "enum": [
+        "lole_days_per_year",
+        "lolh_hours_per_year",
+        "eue_mwh_per_year",
+        "neue_ppm"
+      ],
+      "title": "RiskMetric",
+      "type": "string"
+    },
+    "RmriStatus": {
+      "description": "rMRI status (methodology V0.4 §16 / V0.8 §16A.1).\n\nThe T18-0 contract freeze (methodology §16A.1) fixes the minimal\nstate set to ``not_applicable`` / ``stable`` / ``unstable``; specific\ninstability reasons are carried by structured diagnostic codes, never\nby additional state enum values.",
+      "enum": [
+        "not_applicable",
+        "stable",
+        "unstable"
+      ],
+      "title": "RmriStatus",
+      "type": "string"
+    },
+    "SearchConvergence": {
+      "description": "Equal-risk search convergence status (methodology V0.4 §15.1).",
+      "enum": [
+        "converged",
+        "bracket_only",
+        "plateau_unresolved",
+        "not_converged",
+        "not_applicable"
+      ],
+      "title": "SearchConvergence",
+      "type": "string"
+    },
+    "Severity": {
+      "description": "Diagnostic severity (methodology V0.4 §15.2; data contract V0.3 §24).",
+      "enum": [
+        "info",
+        "warning",
+        "error"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "SocYearBoundaryMode": {
+      "description": "SOC year-boundary mode (methodology V0.4 §6.3).",
+      "enum": [
+        "carry_over",
+        "reinitialize_with_configured_mode",
+        "not_applicable"
+      ],
+      "title": "SocYearBoundaryMode",
+      "type": "string"
+    },
+    "StepEvaluation": {
+      "additionalProperties": false,
+      "description": "method-result 2.0 one step evaluation (§16A.2).",
+      "properties": {
+        "applied_difference_scheme": {
+          "$ref": "#/$defs/DifferenceScheme"
+        },
+        "baseline_risk": {
+          "title": "Baseline Risk",
+          "type": "number"
+        },
+        "crn_identity": {
+          "title": "Crn Identity",
+          "type": "string"
+        },
+        "diagnostics": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Diagnostics",
+          "type": "array"
+        },
+        "lower_ci": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Lower Ci"
+        },
+        "minus_risk": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minus Risk"
+        },
+        "mri_estimate": {
+          "title": "Mri Estimate",
+          "type": "number"
+        },
+        "paired_risk_difference": {
+          "title": "Paired Risk Difference",
+          "type": "number"
+        },
+        "perturbation_vector": {
+          "$ref": "#/$defs/PerturbationVector"
+        },
+        "plus_risk": {
+          "title": "Plus Risk",
+          "type": "number"
+        },
+        "scalar_step": {
+          "title": "Scalar Step",
+          "type": "number"
+        },
+        "standard_error": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Standard Error"
+        },
+        "step_multiplier": {
+          "title": "Step Multiplier",
+          "type": "number"
+        },
+        "upper_ci": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Upper Ci"
+        }
+      },
+      "required": [
+        "step_multiplier",
+        "scalar_step",
+        "perturbation_vector",
+        "baseline_risk",
+        "plus_risk",
+        "paired_risk_difference",
+        "applied_difference_scheme",
+        "mri_estimate",
+        "crn_identity"
+      ],
+      "title": "StepEvaluation",
+      "type": "object"
+    },
+    "StorageSocInitializationMode": {
+      "description": "SOC initialization mode (methodology V0.4 §6.3).",
+      "enum": [
+        "weather_cycle_warmup",
+        "stochastic_sample_burnin",
+        "not_applicable"
+      ],
+      "title": "StorageSocInitializationMode",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/method-result-2.0.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          }
+        },
+        "required": [
+          "method"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          }
+        },
+        "required": [
+          "method"
+        ]
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "code": {
+                    "const": "RMRI_NOT_REQUESTED"
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "invalid_data"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "MRI_ASSESSMENT_ANCHOR_MISSING",
+                      "MRI_INVALID_CONFIG",
+                      "MRI_PHYSICAL_DOMAIN_VIOLATION",
+                      "MRI_RESOURCE_KIND_UNSUPPORTED"
+                    ]
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "invalid_data"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "enum": [
+                    "MRI_CRN_IDENTITY_MISMATCH",
+                    "MRI_SCENARIO_MISMATCH",
+                    "MRI_UNIT_MISMATCH"
+                  ]
+                }
+              },
+              "required": [
+                "code",
+                "severity"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "invalid_method"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "MRI_CRN_IDENTITY_MISMATCH",
+                      "MRI_SCENARIO_MISMATCH",
+                      "MRI_UNIT_MISMATCH"
+                    ]
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "invalid_method"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "enum": [
+                    "MRI_ASSESSMENT_ANCHOR_MISSING",
+                    "MRI_INVALID_CONFIG",
+                    "MRI_PHYSICAL_DOMAIN_VIOLATION",
+                    "MRI_RESOURCE_KIND_UNSUPPORTED"
+                  ]
+                }
+              },
+              "required": [
+                "code",
+                "severity"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "low_resolution"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "severity": {
+                    "const": "error"
+                  }
+                },
+                "required": [
+                  "severity"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "low_resolution"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "MRI_CRN_IDENTITY_MISMATCH",
+                      "MRI_SCENARIO_MISMATCH",
+                      "MRI_UNIT_MISMATCH"
+                    ]
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "low_resolution"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "MRI_ASSESSMENT_ANCHOR_MISSING",
+                      "MRI_INVALID_CONFIG",
+                      "MRI_PHYSICAL_DOMAIN_VIOLATION",
+                      "MRI_RESOURCE_KIND_UNSUPPORTED"
+                    ]
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "not_converged"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "severity": {
+                    "const": "error"
+                  }
+                },
+                "required": [
+                  "severity"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "not_converged"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "MRI_CRN_IDENTITY_MISMATCH",
+                      "MRI_SCENARIO_MISMATCH",
+                      "MRI_UNIT_MISMATCH"
+                    ]
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "not_converged"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "code": {
+                    "enum": [
+                      "MRI_ASSESSMENT_ANCHOR_MISSING",
+                      "MRI_INVALID_CONFIG",
+                      "MRI_PHYSICAL_DOMAIN_VIOLATION",
+                      "MRI_RESOURCE_KIND_UNSUPPORTED"
+                    ]
+                  }
+                },
+                "required": [
+                  "code"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "valid"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "severity": {
+                    "const": "error"
+                  }
+                },
+                "required": [
+                  "severity"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "valid"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "severity": {
+                    "const": "warning"
+                  }
+                },
+                "required": [
+                  "severity"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "valid_with_warning"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "severity": {
+                    "const": "error"
+                  }
+                },
+                "required": [
+                  "severity"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "valid_with_warning"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "diagnostics": {
+            "contains": {
+              "properties": {
+                "code": {
+                  "enum": [
+                    "MRI_DIFFERENCE_SCHEME_FALLBACK",
+                    "MRI_LOCAL_NON_MONOTONIC",
+                    "MRI_STEP_SENSITIVE",
+                    "MRI_STRATEGY_SWITCH",
+                    "RMRI_CUSTOM_NORMALIZATION_MISSING",
+                    "RMRI_DENOMINATOR_UNSTABLE",
+                    "RMRI_NORMALIZATION_MISSING"
+                  ]
+                },
+                "severity": {
+                  "const": "warning"
+                }
+              },
+              "required": [
+                "code",
+                "severity"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "invalid_data"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value",
+          "diagnostics"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "invalid_method"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value",
+          "diagnostics"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "low_resolution"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "not_converged"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "valid"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "base_step": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "diagnostics": {
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "code": {
+                      "const": "RMRI_NOT_REQUESTED"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "severity"
+                  ]
+                }
+              }
+            ]
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          },
+          "sample_count": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "step_multipliers": {
+            "contains": {
+              "const": 1.0
+            },
+            "items": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "mri_value",
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "perfect_capacity_mri_value",
+          "rmri_value",
+          "diagnostics",
+          "sample_count",
+          "base_step",
+          "step_multipliers",
+          "step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "valid_with_warning"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "base_step": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "diagnostics": {
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "code": {
+                      "const": "RMRI_NOT_REQUESTED"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "severity"
+                  ]
+                }
+              }
+            ]
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          },
+          "sample_count": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "step_multipliers": {
+            "contains": {
+              "const": 1.0
+            },
+            "items": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "mri_value",
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "perfect_capacity_mri_value",
+          "rmri_value",
+          "diagnostics",
+          "sample_count",
+          "base_step",
+          "step_multipliers",
+          "step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "invalid_data"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value",
+          "diagnostics"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "invalid_method"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value",
+          "diagnostics"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "low_resolution"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "low_resolution"
+          },
+          "rmri_status": {
+            "const": "unstable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "rmri_value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "perfect_capacity_mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "result_status": {
+            "const": "low_resolution"
+          },
+          "rmri_status": {
+            "const": "unstable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status",
+          "perfect_capacity_mri_value"
+        ]
+      },
+      "then": {
+        "properties": {
+          "perfect_capacity_step_evaluations": {
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "perfect_capacity_step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "not_converged"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "perfect_capacity_mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "not_converged"
+          },
+          "rmri_status": {
+            "const": "unstable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "type": "null"
+          },
+          "rmri_value": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "mri_value",
+          "rmri_value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "perfect_capacity_mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "result_status": {
+            "const": "not_converged"
+          },
+          "rmri_status": {
+            "const": "unstable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status",
+          "perfect_capacity_mri_value"
+        ]
+      },
+      "then": {
+        "properties": {
+          "perfect_capacity_step_evaluations": {
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "perfect_capacity_step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "valid"
+          },
+          "rmri_status": {
+            "const": "stable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "base_step": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perfect_capacity_mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perfect_capacity_step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "rmri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "sample_count": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "step_multipliers": {
+            "contains": {
+              "const": 1.0
+            },
+            "items": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value",
+          "sample_count",
+          "base_step",
+          "step_multipliers",
+          "step_evaluations",
+          "perfect_capacity_step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "valid_with_warning"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "base_step": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "diagnostics": {
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "code": {
+                      "enum": [
+                        "RMRI_CUSTOM_NORMALIZATION_MISSING",
+                        "RMRI_NORMALIZATION_MISSING"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "severity"
+                  ]
+                }
+              }
+            ]
+          },
+          "equivalent_mri_per_mw": {
+            "type": "null"
+          },
+          "mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "rmri_value": {
+            "type": "null"
+          },
+          "sample_count": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "step_multipliers": {
+            "contains": {
+              "const": 1.0
+            },
+            "items": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "mri_value",
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "equivalent_mri_per_mw",
+          "rmri_value",
+          "diagnostics",
+          "sample_count",
+          "base_step",
+          "step_multipliers",
+          "step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "perfect_capacity_mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "result_status": {
+            "const": "valid_with_warning"
+          },
+          "rmri_status": {
+            "const": "not_applicable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status",
+          "perfect_capacity_mri_value"
+        ]
+      },
+      "then": {
+        "properties": {
+          "perfect_capacity_step_evaluations": {
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "perfect_capacity_step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "valid_with_warning"
+          },
+          "rmri_status": {
+            "const": "stable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "base_step": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "diagnostics": {
+            "allOf": [
+              {
+                "not": {
+                  "contains": {
+                    "properties": {
+                      "code": {
+                        "enum": [
+                          "MRI_LOCAL_NON_MONOTONIC",
+                          "MRI_STEP_SENSITIVE",
+                          "MRI_STRATEGY_SWITCH",
+                          "RMRI_DENOMINATOR_UNSTABLE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "code"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perfect_capacity_mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perfect_capacity_step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "rmri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "sample_count": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "step_multipliers": {
+            "contains": {
+              "const": 1.0
+            },
+            "items": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "rmri_value",
+          "diagnostics",
+          "sample_count",
+          "base_step",
+          "step_multipliers",
+          "step_evaluations",
+          "perfect_capacity_step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "valid_with_warning"
+          },
+          "rmri_status": {
+            "const": "unstable"
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "accredited_capacity_mw": {
+            "type": "null"
+          },
+          "base_step": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "capacity_credit_fraction": {
+            "type": "null"
+          },
+          "diagnostics": {
+            "allOf": [
+              {
+                "contains": {
+                  "properties": {
+                    "code": {
+                      "enum": [
+                        "MRI_LOCAL_NON_MONOTONIC",
+                        "MRI_STEP_SENSITIVE",
+                        "MRI_STRATEGY_SWITCH",
+                        "RMRI_DENOMINATOR_UNSTABLE"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "severity"
+                  ]
+                }
+              }
+            ]
+          },
+          "mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perfect_capacity_mri_value": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perfect_capacity_step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "rmri_value": {
+            "type": "null"
+          },
+          "sample_count": {
+            "exclusiveMinimum": 0,
+            "type": "integer"
+          },
+          "step_evaluations": {
+            "items": {
+              "allOf": [
+                {
+                  "properties": {
+                    "step_multiplier": {
+                      "exclusiveMinimum": 0,
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "step_multiplier"
+                  ]
+                }
+              ]
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "step_multipliers": {
+            "contains": {
+              "const": 1.0
+            },
+            "items": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "mri_value",
+          "perfect_capacity_mri_value",
+          "accredited_capacity_mw",
+          "capacity_credit_fraction",
+          "rmri_value",
+          "diagnostics",
+          "sample_count",
+          "base_step",
+          "step_multipliers",
+          "step_evaluations",
+          "perfect_capacity_step_evaluations"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "invalid_data"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "invalid_method"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "low_resolution"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "not_converged"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "valid"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "mri"
+          },
+          "result_status": {
+            "const": "valid_with_warning"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "invalid_data"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "invalid_method"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "low_resolution"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable",
+                "unstable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "not_converged"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable",
+                "unstable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "valid"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "stable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "method": {
+            "const": "rmri"
+          },
+          "result_status": {
+            "const": "valid_with_warning"
+          },
+          "rmri_status": {
+            "not": {
+              "enum": [
+                "not_applicable",
+                "stable",
+                "unstable"
+              ]
+            }
+          }
+        },
+        "required": [
+          "method",
+          "result_status",
+          "rmri_status"
+        ]
+      },
+      "then": {
+        "not": {}
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "invalid_data"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "risk_convergence": {
+            "const": "not_converged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "invalid_method"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "risk_convergence": {
+            "const": "not_converged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "low_resolution"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "risk_convergence": {
+            "const": "low_event_count"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "not_converged"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "risk_convergence": {
+            "const": "not_converged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "valid"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "risk_convergence": {
+            "const": "converged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "result_status": {
+            "const": "valid_with_warning"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "risk_convergence": {
+            "const": "converged"
+          }
+        }
+      }
+    }
+  ],
+  "description": "method-result 2.0 for MRI/rMRI (T18 write target).",
+  "properties": {
+    "accredited_capacity_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Accredited Capacity Mw"
+    },
+    "allocation_rule_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Allocation Rule Id"
+    },
+    "allocation_type": {
+      "$ref": "#/$defs/AllocationType"
+    },
+    "anchor_calibration_method": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Anchor Calibration Method"
+    },
+    "anchor_risk_metric": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RiskMetric"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "anchor_risk_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Anchor Risk Value"
+    },
+    "anchor_standard_source_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Anchor Standard Source Id"
+    },
+    "applied_difference_scheme": {
+      "$ref": "#/$defs/DifferenceScheme"
+    },
+    "assessment_anchor": {
+      "$ref": "#/$defs/AssessmentAnchor"
+    },
+    "base_step": {
+      "title": "Base Step",
+      "type": "number"
+    },
+    "baseline_portfolio_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Baseline Portfolio Version"
+    },
+    "capacity_credit_fraction": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Capacity Credit Fraction"
+    },
+    "capacity_value_type": {
+      "$ref": "#/$defs/CapacityValueType"
+    },
+    "chronology_mode": {
+      "$ref": "#/$defs/ChronologyMode"
+    },
+    "diagnostics": {
+      "items": {
+        "anyOf": [
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_ASSESSMENT_ANCHOR_MISSING"
+              },
+              "severity": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_CRN_IDENTITY_MISMATCH"
+              },
+              "severity": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_DIFFERENCE_SCHEME_FALLBACK"
+              },
+              "severity": {
+                "const": "warning"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_INVALID_CONFIG"
+              },
+              "severity": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_LOCAL_NON_MONOTONIC"
+              },
+              "severity": {
+                "const": "warning"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_PHYSICAL_DOMAIN_VIOLATION"
+              },
+              "severity": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_RESOURCE_KIND_UNSUPPORTED"
+              },
+              "severity": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_SCENARIO_MISMATCH"
+              },
+              "severity": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_STEP_SENSITIVE"
+              },
+              "severity": {
+                "const": "warning"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_STRATEGY_SWITCH"
+              },
+              "severity": {
+                "const": "warning"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "MRI_UNIT_MISMATCH"
+              },
+              "severity": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "RMRI_CUSTOM_NORMALIZATION_MISSING"
+              },
+              "severity": {
+                "const": "warning"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "RMRI_DENOMINATOR_UNSTABLE"
+              },
+              "severity": {
+                "const": "warning"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "RMRI_NORMALIZATION_MISSING"
+              },
+              "severity": {
+                "const": "warning"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          },
+          {
+            "properties": {
+              "code": {
+                "const": "RMRI_NOT_REQUESTED"
+              },
+              "severity": {
+                "const": "info"
+              }
+            },
+            "required": [
+              "code",
+              "severity"
+            ]
+          }
+        ]
+      },
+      "title": "Diagnostics",
+      "type": "array"
+    },
+    "effective_data_grade": {
+      "$ref": "#/$defs/DataGrade"
+    },
+    "equivalent_mri_per_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Equivalent Mri Per Mw"
+    },
+    "method": {
+      "$ref": "#/$defs/Method"
+    },
+    "method_profile": {
+      "title": "Method Profile",
+      "type": "string"
+    },
+    "mri_unit": {
+      "title": "Mri Unit",
+      "type": "string"
+    },
+    "mri_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Mri Value"
+    },
+    "normalization_basis_mwh_per_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalization Basis Mwh Per Mw"
+    },
+    "perfect_capacity_mri_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Perfect Capacity Mri Value"
+    },
+    "perfect_capacity_step_evaluations": {
+      "items": {
+        "$ref": "#/$defs/StepEvaluation"
+      },
+      "title": "Perfect Capacity Step Evaluations",
+      "type": "array"
+    },
+    "primary_risk_metric": {
+      "$ref": "#/$defs/RiskMetric"
+    },
+    "reference_capacity_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reference Capacity Mw"
+    },
+    "requested_difference_scheme": {
+      "$ref": "#/$defs/DifferenceScheme"
+    },
+    "resource_or_portfolio_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resource Or Portfolio Id"
+    },
+    "result_id": {
+      "format": "uuid",
+      "title": "Result Id",
+      "type": "string"
+    },
+    "result_schema_version": {
+      "const": "2.0",
+      "default": "2.0",
+      "title": "Result Schema Version",
+      "type": "string"
+    },
+    "result_status": {
+      "$ref": "#/$defs/ResultStatus"
+    },
+    "risk_convergence": {
+      "$ref": "#/$defs/RiskConvergence"
+    },
+    "rmri_status": {
+      "$ref": "#/$defs/RmriStatus",
+      "default": "not_applicable"
+    },
+    "rmri_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rmri Value"
+    },
+    "run_id": {
+      "format": "uuid",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sample_count": {
+      "minimum": 0,
+      "title": "Sample Count",
+      "type": "integer"
+    },
+    "scenario_bank_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Bank Id"
+    },
+    "search_convergence": {
+      "$ref": "#/$defs/SearchConvergence",
+      "default": "not_applicable"
+    },
+    "soc_year_boundary_mode": {
+      "$ref": "#/$defs/SocYearBoundaryMode"
+    },
+    "step_evaluations": {
+      "items": {
+        "$ref": "#/$defs/StepEvaluation"
+      },
+      "title": "Step Evaluations",
+      "type": "array"
+    },
+    "step_multipliers": {
+      "items": {
+        "type": "number"
+      },
+      "title": "Step Multipliers",
+      "type": "array"
+    },
+    "step_unit": {
+      "enum": [
+        "mw",
+        "mwh"
+      ],
+      "title": "Step Unit",
+      "type": "string"
+    },
+    "storage_soc_initialization_mode": {
+      "$ref": "#/$defs/StorageSocInitializationMode"
+    }
+  },
+  "required": [
+    "result_id",
+    "run_id",
+    "method",
+    "method_profile",
+    "capacity_value_type",
+    "allocation_type",
+    "chronology_mode",
+    "storage_soc_initialization_mode",
+    "soc_year_boundary_mode",
+    "assessment_anchor",
+    "primary_risk_metric",
+    "mri_unit",
+    "requested_difference_scheme",
+    "applied_difference_scheme",
+    "base_step",
+    "step_unit",
+    "sample_count",
+    "result_status",
+    "risk_convergence",
+    "effective_data_grade"
+  ],
+  "title": "method-result-2.0.json",
+  "type": "object",
+  "x-contract-version": "2.0"
+}

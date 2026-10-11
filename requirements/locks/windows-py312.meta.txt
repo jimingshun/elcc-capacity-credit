@@ -1,0 +1,41 @@
+# Dependency lock metadata for windows-py312.txt
+#
+# This sidecar file records the exact environment and command that produced
+# requirements/locks/windows-py312.txt. It is authoritative metadata for the
+# lock and must be updated together with the lock file.
+
+lock_file: requirements/locks/windows-py312.txt
+
+generated_at: 2026-08-04
+
+interpreter:
+  executable: D:\python\python.exe (venv: .venv)
+  python: CPython 3.12.6
+  platform: win32
+
+tooling:
+  pip: 25.3
+  pip-tools: 7.6.0
+
+generation_command: >-
+  .venv\Scripts\python.exe -m piptools compile --allow-unsafe --strip-extras
+  --output-file=requirements/locks/windows-py312.txt requirements/base.in
+  requirements/dev.in requirements/report.in requirements/ui.in
+
+input_files:
+  - requirements/base.in
+  - requirements/dev.in
+  - requirements/report.in
+  - requirements/ui.in
+
+notes:
+  - "--allow-unsafe pins pip and setuptools (bootstrap tools) with explicit
+    versions in the lock; they are not guessed."
+  - "pip-tools 7.6.0 (latest) is incompatible with pip 26 (it imports
+    pip._internal.utils.compat.stdlib_pkgs, removed in pip 26); dev.in
+    therefore constrains pip<26 and the lock pins pip 25.3."
+  - "types-PyYAML (dev) added for strict mypy checking of YAML helpers."
+  - "jsonschema (dev) added for executable JSON Schema validation tests."
+  - "pandas-stubs (dev) added for strict mypy checking of the data layer."
+  - "Business dependency scope is unchanged: base (runtime), dev (quality
+    gates), report (Excel/HTML/plots) and ui (Streamlit, P6)."

@@ -1,0 +1,25 @@
+Metadata-Version: 2.4
+Name: capacity-credit
+Version: 0.1.0
+Summary: Local, auditable ELCC / EFC / MRI (rMRI) capacity credit assessment toolkit
+Requires-Python: <3.13,>=3.12
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pandas
+Requires-Dist: pyarrow
+Requires-Dist: pydantic>=2
+Requires-Dist: typer
+Requires-Dist: pyyaml
+Provides-Extra: dev
+Requires-Dist: hypothesis; extra == "dev"
+Requires-Dist: mypy; extra == "dev"
+Requires-Dist: pip-tools; extra == "dev"
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: ruff; extra == "dev"
+Provides-Extra: report
+Requires-Dist: jinja2; extra == "report"
+Requires-Dist: openpyxl; extra == "report"
+Requires-Dist: plotly; extra == "report"
+Requires-Dist: xlsxwriter; extra == "report"
+Provides-Extra: ui
+Requires-Dist: streamlit; extra == "ui"

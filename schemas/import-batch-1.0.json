@@ -1,0 +1,337 @@
+{
+  "$defs": {
+    "DataGrade": {
+      "description": "Data grade machine values (data contract V0.3 §8.1).",
+      "enum": [
+        "G0_teaching",
+        "G1_preliminary",
+        "G2_research",
+        "G3_rule_support"
+      ],
+      "title": "DataGrade",
+      "type": "string"
+    },
+    "DataVersionStatus": {
+      "description": "Data version lifecycle (application service contract V0.2 §2).",
+      "enum": [
+        "draft",
+        "blocked",
+        "validated",
+        "frozen",
+        "superseded",
+        "archived"
+      ],
+      "title": "DataVersionStatus",
+      "type": "string"
+    },
+    "GradeEvidence": {
+      "additionalProperties": false,
+      "description": "Exact-shape grade evidence (declared / computed_max / effective).",
+      "properties": {
+        "computed_max_data_grade": {
+          "$ref": "#/$defs/DataGrade"
+        },
+        "declared_data_grade": {
+          "$ref": "#/$defs/DataGrade"
+        },
+        "effective_data_grade": {
+          "$ref": "#/$defs/DataGrade"
+        }
+      },
+      "required": [
+        "declared_data_grade",
+        "computed_max_data_grade",
+        "effective_data_grade"
+      ],
+      "title": "GradeEvidence",
+      "type": "object"
+    },
+    "ImportReviewStatus": {
+      "description": "Human import review conclusion (application service contract V0.2 §2).",
+      "enum": [
+        "pending_review",
+        "approved",
+        "rejected",
+        "superseded"
+      ],
+      "title": "ImportReviewStatus",
+      "type": "string"
+    },
+    "ValidationStatus": {
+      "description": "Automatic validation conclusion (application service contract V0.2 §2).",
+      "enum": [
+        "pending",
+        "passed",
+        "failed"
+      ],
+      "title": "ValidationStatus",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/import-batch-1.0.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "grades": {
+            "properties": {
+              "declared_data_grade": {
+                "const": "G0_teaching"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "grades": {
+            "properties": {
+              "computed_max_data_grade": {
+                "enum": [
+                  "G0_teaching",
+                  "G1_preliminary",
+                  "G2_research",
+                  "G3_rule_support"
+                ]
+              },
+              "effective_data_grade": {
+                "enum": [
+                  "G0_teaching"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "grades": {
+            "properties": {
+              "declared_data_grade": {
+                "const": "G1_preliminary"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "grades": {
+            "properties": {
+              "computed_max_data_grade": {
+                "enum": [
+                  "G1_preliminary",
+                  "G2_research",
+                  "G3_rule_support"
+                ]
+              },
+              "effective_data_grade": {
+                "enum": [
+                  "G0_teaching",
+                  "G1_preliminary"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "grades": {
+            "properties": {
+              "declared_data_grade": {
+                "const": "G2_research"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "grades": {
+            "properties": {
+              "computed_max_data_grade": {
+                "enum": [
+                  "G2_research",
+                  "G3_rule_support"
+                ]
+              },
+              "effective_data_grade": {
+                "enum": [
+                  "G0_teaching",
+                  "G1_preliminary",
+                  "G2_research"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "grades": {
+            "properties": {
+              "declared_data_grade": {
+                "const": "G3_rule_support"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "grades": {
+            "properties": {
+              "computed_max_data_grade": {
+                "enum": [
+                  "G3_rule_support"
+                ]
+              },
+              "effective_data_grade": {
+                "enum": [
+                  "G0_teaching",
+                  "G1_preliminary",
+                  "G2_research",
+                  "G3_rule_support"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "description": "Import batch record with review and data-version state.",
+  "properties": {
+    "approved_data_version_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approved Data Version Id"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "created_by": {
+      "title": "Created By",
+      "type": "string"
+    },
+    "data_version_hash": {
+      "pattern": "[0-9a-fA-F]{64}",
+      "title": "Data Version Hash",
+      "type": "string"
+    },
+    "data_version_id": {
+      "title": "Data Version Id",
+      "type": "string"
+    },
+    "data_version_status": {
+      "$ref": "#/$defs/DataVersionStatus"
+    },
+    "dataset_id": {
+      "title": "Dataset Id",
+      "type": "string"
+    },
+    "grades": {
+      "$ref": "#/$defs/GradeEvidence"
+    },
+    "import_batch_id": {
+      "format": "uuid",
+      "title": "Import Batch Id",
+      "type": "string"
+    },
+    "import_review_status": {
+      "$ref": "#/$defs/ImportReviewStatus"
+    },
+    "import_schema_version": {
+      "const": "1.0",
+      "title": "Import Schema Version",
+      "type": "string"
+    },
+    "review_comment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Review Comment"
+    },
+    "reviewed_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewed At"
+    },
+    "reviewed_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewed By"
+    },
+    "superseded_by_import_batch_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Superseded By Import Batch Id"
+    },
+    "validation_status": {
+      "$ref": "#/$defs/ValidationStatus"
+    }
+  },
+  "required": [
+    "import_schema_version",
+    "import_batch_id",
+    "dataset_id",
+    "data_version_id",
+    "data_version_hash",
+    "data_version_status",
+    "validation_status",
+    "import_review_status",
+    "created_by",
+    "created_at",
+    "grades"
+  ],
+  "title": "import-batch-1.0.json",
+  "type": "object",
+  "x-contract-version": "1.0"
+}

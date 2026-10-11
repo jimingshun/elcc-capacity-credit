@@ -1,0 +1,1400 @@
+{
+  "$defs": {
+    "AllocationType": {
+      "description": "Allocation of capacity value results (methodology V0.4 §11.3).",
+      "enum": [
+        "none",
+        "governance_rule"
+      ],
+      "title": "AllocationType",
+      "type": "string"
+    },
+    "AssessmentAnchor": {
+      "description": "MRI/rMRI assessment anchor (methodology V0.4 §7.4).",
+      "enum": [
+        "current_system",
+        "calibrated_standard"
+      ],
+      "title": "AssessmentAnchor",
+      "type": "string"
+    },
+    "CalibratedBaselineRef": {
+      "additionalProperties": false,
+      "description": "MR-02 (A2 方案一): optional reference binding a run to ONE\nconverged calibration round (方法说明第八章风险2 流程锁).\n\nFields are copied from the calibration batch's converged decision;\nthe workflow validates data_version_hash against THIS run's frozen\ndata version and the criterion triple against sane ranges BEFORE\ncreate_run. Absent = the run is honestly declared NOT\nbaseline-calibrated (BASELINE_NOT_CALIBRATED diagnostic).",
+      "properties": {
+        "calibration_batch_id": {
+          "title": "Calibration Batch Id",
+          "type": "string"
+        },
+        "criterion_metric": {
+          "title": "Criterion Metric",
+          "type": "string"
+        },
+        "criterion_target_value": {
+          "title": "Criterion Target Value",
+          "type": "number"
+        },
+        "data_version_hash": {
+          "title": "Data Version Hash",
+          "type": "string"
+        },
+        "load_scale_percent": {
+          "title": "Load Scale Percent",
+          "type": "number"
+        },
+        "tolerance_percent": {
+          "title": "Tolerance Percent",
+          "type": "number"
+        }
+      },
+      "required": [
+        "calibration_batch_id",
+        "load_scale_percent",
+        "criterion_metric",
+        "criterion_target_value",
+        "tolerance_percent",
+        "data_version_hash"
+      ],
+      "title": "CalibratedBaselineRef",
+      "type": "object"
+    },
+    "CapacityValueType": {
+      "description": "Capacity value types (methodology V0.4 §11).",
+      "enum": [
+        "average",
+        "marginal",
+        "portfolio",
+        "not_applicable"
+      ],
+      "title": "CapacityValueType",
+      "type": "string"
+    },
+    "ChronologyMode": {
+      "description": "Time-series organisation mode (methodology V0.4 §6.3).",
+      "enum": [
+        "independent_weather_years",
+        "continuous_multiyear"
+      ],
+      "title": "ChronologyMode",
+      "type": "string"
+    },
+    "EfcCriterionConfig": {
+      "additionalProperties": false,
+      "description": "MR-01.1: which calibre the EFC search judges risk in.\n\n``annual`` (default) = the legacy full-year metrics, bit-identical\nbehavior. ``winter_evening_peak`` = the SAME metrics computed on the\nwindow slice only (never a second metric formula).",
+      "properties": {
+        "criterion_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Criterion Config Schema Version",
+          "type": "string"
+        },
+        "mode": {
+          "default": "annual",
+          "enum": [
+            "annual",
+            "winter_evening_peak"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "window": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EfcCriterionWindowConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "EfcCriterionConfig",
+      "type": "object"
+    },
+    "EfcCriterionWindowConfig": {
+      "additionalProperties": false,
+      "description": "MR-01.1: the winter-evening-peak criterion window (provisional\ndefaults; 正式身份前由基准测试锁定). Months/hours are interpreted on\nthe run's LOCAL time axis. A window that selects nothing is refused\nat run time (METRICS_WINDOW_EMPTY).",
+      "properties": {
+        "criterion_window_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Criterion Window Schema Version",
+          "type": "string"
+        },
+        "evening_hours": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Evening Hours",
+          "type": "array"
+        },
+        "provisional_status": {
+          "const": "provisional",
+          "default": "provisional",
+          "title": "Provisional Status",
+          "type": "string"
+        },
+        "winter_months": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Winter Months",
+          "type": "array"
+        }
+      },
+      "title": "EfcCriterionWindowConfig",
+      "type": "object"
+    },
+    "EfcMethodConfig": {
+      "additionalProperties": false,
+      "description": "Typed, versioned EFC method configuration embedded in the frozen\nRunConfig (full-config lineage; no ``Any`` fields).\n\nShares the search (decreasing direction), candidate identity and\nconvergence structures with ELCC; carries the EFC-only perfect\ncapacity definition and the search upper bound. No ELCC load-growth\nsection.",
+      "properties": {
+        "candidate": {
+          "$ref": "#/$defs/ElccMethodCandidateConfig"
+        },
+        "convergence": {
+          "$ref": "#/$defs/ElccMethodConvergenceConfig"
+        },
+        "criterion": {
+          "$ref": "#/$defs/EfcCriterionConfig"
+        },
+        "emergency_layer": {
+          "default": "auto",
+          "enum": [
+            "auto",
+            "disabled"
+          ],
+          "title": "Emergency Layer",
+          "type": "string"
+        },
+        "method_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Method Config Schema Version",
+          "type": "string"
+        },
+        "perfect_capacity": {
+          "$ref": "#/$defs/EfcMethodPerfectCapacityConfig"
+        },
+        "reporting": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EfcReportingConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "search": {
+          "$ref": "#/$defs/EfcMethodSearchConfig"
+        },
+        "storage_soc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageSocConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "upper_bound": {
+          "$ref": "#/$defs/EfcMethodUpperBoundConfig"
+        }
+      },
+      "required": [
+        "search",
+        "candidate",
+        "upper_bound"
+      ],
+      "title": "EfcMethodConfig",
+      "type": "object"
+    },
+    "EfcMethodPerfectCapacityConfig": {
+      "additionalProperties": false,
+      "description": "The frozen perfect-capacity definition used by the S+F trials.",
+      "properties": {
+        "definition_version": {
+          "default": "perfect_v1",
+          "title": "Definition Version",
+          "type": "string"
+        },
+        "perfect_capacity_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Perfect Capacity Schema Version",
+          "type": "string"
+        }
+      },
+      "title": "EfcMethodPerfectCapacityConfig",
+      "type": "object"
+    },
+    "EfcMethodSearchConfig": {
+      "additionalProperties": false,
+      "description": "EFC search: risk DECREASES with the perfect capacity F; the\nlower bound is fixed at 0 MW (F starts at zero). The ELCC\nincreasing-load branch is never reused.",
+      "properties": {
+        "allow_upper_bound_expansion": {
+          "default": false,
+          "title": "Allow Upper Bound Expansion",
+          "type": "boolean"
+        },
+        "capacity_tolerance_mw": {
+          "title": "Capacity Tolerance Mw",
+          "type": "number"
+        },
+        "confidence_level": {
+          "default": 0.95,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "lower_bound_mw": {
+          "default": 0.0,
+          "title": "Lower Bound Mw",
+          "type": "number"
+        },
+        "max_expanded_upper_bound_mw": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Expanded Upper Bound Mw"
+        },
+        "max_iterations": {
+          "title": "Max Iterations",
+          "type": "integer"
+        },
+        "monotonic_direction": {
+          "default": "risk_increases_with_capacity",
+          "title": "Monotonic Direction",
+          "type": "string"
+        },
+        "physical_upper_bound_mw": {
+          "title": "Physical Upper Bound Mw",
+          "type": "number"
+        }
+      },
+      "required": [
+        "physical_upper_bound_mw",
+        "capacity_tolerance_mw",
+        "max_iterations"
+      ],
+      "title": "EfcMethodSearchConfig",
+      "type": "object"
+    },
+    "EfcMethodUpperBoundConfig": {
+      "additionalProperties": false,
+      "description": "Declared physical upper bound for the EFC search variable F.",
+      "properties": {
+        "declared_mw": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Declared Mw"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source"
+      ],
+      "title": "EfcMethodUpperBoundConfig",
+      "type": "object"
+    },
+    "EfcReportingConfig": {
+      "additionalProperties": false,
+      "description": "MR-01.2/01.3: the de-rating-table identity of one EFC run - the\ntechnology class (with its human attestation, 方法说明第七章 类别\n归属认定) and the delivery year the factor is valid for (降额系数\n只对所属交付年有效, 跨交付年不可直接沿用).",
+      "properties": {
+        "auction_round": {
+          "default": "none",
+          "enum": [
+            "T4",
+            "T1",
+            "none"
+          ],
+          "title": "Auction Round",
+          "type": "string"
+        },
+        "class_attestation_basis": {
+          "default": "",
+          "title": "Class Attestation Basis",
+          "type": "string"
+        },
+        "class_attested_by": {
+          "default": "",
+          "title": "Class Attested By",
+          "type": "string"
+        },
+        "delivery_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Delivery Year"
+        },
+        "reporting_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Reporting Config Schema Version",
+          "type": "string"
+        },
+        "technology_class": {
+          "title": "Technology Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "technology_class"
+      ],
+      "title": "EfcReportingConfig",
+      "type": "object"
+    },
+    "ElccMethodCandidateConfig": {
+      "additionalProperties": false,
+      "description": "Candidate resource identity and capacity.\n\nExactly ONE selection form is required: a single\n``resource_group_id`` or an explicit member id list\n(``resource_group_ids``). Member ids are normalized: trimmed,\nnon-blank, deduplicated, then stable-sorted. The workflow resolves\nthe selection against the frozen renewable data; unknown /\nduplicate / ambiguous / incomplete selections are blocked before\nany run side effect.",
+      "properties": {
+        "reference_capacity_mw": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference Capacity Mw"
+        },
+        "resource_group_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resource Group Id"
+        },
+        "resource_group_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resource Group Ids"
+        },
+        "resource_or_portfolio_id": {
+          "title": "Resource Or Portfolio Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "resource_or_portfolio_id"
+      ],
+      "title": "ElccMethodCandidateConfig",
+      "type": "object"
+    },
+    "ElccMethodConfig": {
+      "additionalProperties": false,
+      "description": "Typed, versioned ELCC method configuration embedded in the\nfrozen RunConfig (full-config lineage; no ``Any`` fields).\n\nThe normalized dump of this model is part of ``run_config`` and\ntherefore part of the run_config_hash, the create_run idempotency\nparameters and the run manifest lineage. Adequacy runs carry\nmethod_config=None (backward compatible).",
+      "properties": {
+        "calibrated_baseline_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CalibratedBaselineRef"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "candidate": {
+          "$ref": "#/$defs/ElccMethodCandidateConfig"
+        },
+        "convergence": {
+          "$ref": "#/$defs/ElccMethodConvergenceConfig"
+        },
+        "load_growth": {
+          "$ref": "#/$defs/ElccMethodLoadGrowthConfig"
+        },
+        "method_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Method Config Schema Version",
+          "type": "string"
+        },
+        "search": {
+          "$ref": "#/$defs/ElccMethodSearchConfig"
+        },
+        "storage_soc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageSocConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "search",
+        "load_growth",
+        "candidate"
+      ],
+      "title": "ElccMethodConfig",
+      "type": "object"
+    },
+    "ElccMethodConvergenceConfig": {
+      "additionalProperties": false,
+      "description": "Engine convergence parameters (typed, versioned).\n\nThe defaults are PROVISIONAL teaching thresholds so the ELCC chain\nconverges on small synthetic banks - they are explicitly marked and\nnever hidden; they are NOT policy or industry thresholds.\n``confidence_level`` is the RISK-ESTIMATE convergence confidence\n(methodology §12.3/§12.4: the 95% interval half-width criterion).\nThe frozen methodology defines NO separate equal-risk search\nconfidence level, so ``ElccMethodSearchConfig.confidence_level``\nmust equal this value (enforced by ElccMethodConfig); any\ndivergence requires a methodology revision and re-review.",
+      "properties": {
+        "absolute_half_width_tolerance": {
+          "default": 0.001,
+          "title": "Absolute Half Width Tolerance",
+          "type": "number"
+        },
+        "batch_size": {
+          "default": 10,
+          "title": "Batch Size",
+          "type": "integer"
+        },
+        "confidence_level": {
+          "default": 0.95,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "convergence_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Convergence Config Schema Version",
+          "type": "string"
+        },
+        "max_samples": {
+          "default": 1000,
+          "title": "Max Samples",
+          "type": "integer"
+        },
+        "min_nonzero_samples": {
+          "default": 3,
+          "title": "Min Nonzero Samples",
+          "type": "integer"
+        },
+        "min_samples": {
+          "default": 6,
+          "title": "Min Samples",
+          "type": "integer"
+        },
+        "near_zero_threshold": {
+          "default": 0.05,
+          "title": "Near Zero Threshold",
+          "type": "number"
+        },
+        "normal_interval_min_samples": {
+          "default": 200,
+          "title": "Normal Interval Min Samples",
+          "type": "integer"
+        },
+        "provisional_defaults": {
+          "default": true,
+          "title": "Provisional Defaults",
+          "type": "boolean"
+        },
+        "recent_batch_stability_tolerance": {
+          "default": 1.0,
+          "title": "Recent Batch Stability Tolerance",
+          "type": "number"
+        },
+        "recent_batch_window": {
+          "default": 3,
+          "title": "Recent Batch Window",
+          "type": "integer"
+        },
+        "relative_half_width_tolerance": {
+          "default": 0.5,
+          "title": "Relative Half Width Tolerance",
+          "type": "number"
+        },
+        "teaching_note": {
+          "default": "provisional teaching thresholds for synthetic banks; not policy",
+          "title": "Teaching Note",
+          "type": "string"
+        },
+        "use_student_t": {
+          "default": true,
+          "title": "Use Student T",
+          "type": "boolean"
+        }
+      },
+      "title": "ElccMethodConvergenceConfig",
+      "type": "object"
+    },
+    "ElccMethodLoadGrowthConfig": {
+      "additionalProperties": false,
+      "description": "Load growth mode and parameters (methodology V0.4 §8.2).",
+      "properties": {
+        "mode": {
+          "enum": [
+            "fixed_mw",
+            "scaling",
+            "specified"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "specified_profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LoadGrowthProfileConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "title": "ElccMethodLoadGrowthConfig",
+      "type": "object"
+    },
+    "ElccMethodSearchConfig": {
+      "additionalProperties": false,
+      "description": "ELCC search: risk increases with load growth; the lower bound is\nfixed at 0 MW (load-growth search). Never reused by EFC.",
+      "properties": {
+        "allow_upper_bound_expansion": {
+          "default": false,
+          "title": "Allow Upper Bound Expansion",
+          "type": "boolean"
+        },
+        "capacity_tolerance_mw": {
+          "title": "Capacity Tolerance Mw",
+          "type": "number"
+        },
+        "confidence_level": {
+          "default": 0.95,
+          "title": "Confidence Level",
+          "type": "number"
+        },
+        "lower_bound_mw": {
+          "default": 0.0,
+          "title": "Lower Bound Mw",
+          "type": "number"
+        },
+        "max_expanded_upper_bound_mw": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Expanded Upper Bound Mw"
+        },
+        "max_iterations": {
+          "title": "Max Iterations",
+          "type": "integer"
+        },
+        "monotonic_direction": {
+          "default": "risk_increases_with_capacity",
+          "title": "Monotonic Direction",
+          "type": "string"
+        },
+        "physical_upper_bound_mw": {
+          "title": "Physical Upper Bound Mw",
+          "type": "number"
+        }
+      },
+      "required": [
+        "physical_upper_bound_mw",
+        "capacity_tolerance_mw",
+        "max_iterations"
+      ],
+      "title": "ElccMethodSearchConfig",
+      "type": "object"
+    },
+    "LoadGrowthProfileConfig": {
+      "additionalProperties": false,
+      "description": "Strict, versioned specified-growth profile contract (round 3).\n\nThe payload mirrors the domain ``LoadGrowthProfile.from_dict``\ndocument exactly (the seven fields, extra=forbid); the FULL\nstructural validation - year-set equality, 1-hour strictly\nincreasing axis, duplicate timestamps, shape lengths, basis/status\nliterals, finite non-negative scale - is executed at CONFIG parse\ntime by the single domain authority, so config, RunConfig /\nElccMethodConfig and the generated JSON Schema all express the same\nstructure and the workflow never receives a structurally invalid\nprofile.",
+      "properties": {
+        "basis": {
+          "enum": [
+            "growth_multiplier",
+            "growth_addition_mw"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "data_status": {
+          "enum": [
+            "modelled",
+            "assumed",
+            "derived"
+          ],
+          "title": "Data Status",
+          "type": "string"
+        },
+        "load_growth_profile_id": {
+          "title": "Load Growth Profile Id",
+          "type": "string"
+        },
+        "profile_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Profile Schema Version",
+          "type": "string"
+        },
+        "scale": {
+          "title": "Scale",
+          "type": "number"
+        },
+        "shape_by_year": {
+          "additionalProperties": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "title": "Shape By Year",
+          "type": "object"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "timestamps_by_year": {
+          "additionalProperties": {
+            "$ref": "#/$defs/LoadGrowthTimestampsConfig"
+          },
+          "title": "Timestamps By Year",
+          "type": "object"
+        }
+      },
+      "required": [
+        "load_growth_profile_id",
+        "source_id",
+        "data_status",
+        "basis",
+        "scale",
+        "shape_by_year",
+        "timestamps_by_year"
+      ],
+      "title": "LoadGrowthProfileConfig",
+      "type": "object"
+    },
+    "LoadGrowthTimestampsConfig": {
+      "additionalProperties": false,
+      "description": "One weather-year timestamp axis (mirrors the domain profile\npayload: timezone name + ISO stamps).",
+      "properties": {
+        "stamps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Stamps",
+          "type": "array"
+        },
+        "timezone": {
+          "title": "Timezone",
+          "type": "string"
+        }
+      },
+      "required": [
+        "timezone",
+        "stamps"
+      ],
+      "title": "LoadGrowthTimestampsConfig",
+      "type": "object"
+    },
+    "PerturbationDimension": {
+      "description": "MRI perturbation dimension (methodology V0.4 §10.1).",
+      "enum": [
+        "fixed_duration",
+        "power_only",
+        "energy_only",
+        "custom_vector"
+      ],
+      "title": "PerturbationDimension",
+      "type": "string"
+    },
+    "RiskMetric": {
+      "description": "Primary risk metric machine values (methodology V0.4 §3.4).",
+      "enum": [
+        "lole_days_per_year",
+        "lolh_hours_per_year",
+        "eue_mwh_per_year",
+        "neue_ppm"
+      ],
+      "title": "RiskMetric",
+      "type": "string"
+    },
+    "RunMode": {
+      "description": "Run modes (application service contract V0.2 §3).",
+      "enum": [
+        "formal",
+        "teaching",
+        "benchmark"
+      ],
+      "title": "RunMode",
+      "type": "string"
+    },
+    "RunType": {
+      "description": "Run types (application service contract V0.2 §3; product design §6.2).",
+      "enum": [
+        "validate",
+        "adequacy",
+        "elcc",
+        "efc",
+        "mri",
+        "rmri",
+        "portfolio",
+        "sensitivity",
+        "benchmark",
+        "report",
+        "demand_target_capacity"
+      ],
+      "title": "RunType",
+      "type": "string"
+    },
+    "SocYearBoundaryMode": {
+      "description": "SOC year-boundary mode (methodology V0.4 §6.3).",
+      "enum": [
+        "carry_over",
+        "reinitialize_with_configured_mode",
+        "not_applicable"
+      ],
+      "title": "SocYearBoundaryMode",
+      "type": "string"
+    },
+    "StorageBurninConfig": {
+      "additionalProperties": false,
+      "description": "Stochastic sample burn-in parameters (provisional / pending\nbenchmark - never policy constants). Stability is judged by the\nLENGTH comparison of the same batch and stream (see\nstorage_chronology.compare_burnin_lengths); the two tolerances are\npart of this controlled config and enter the schema and hashes.",
+      "properties": {
+        "benchmark_status": {
+          "const": "pending_benchmark",
+          "default": "pending_benchmark",
+          "title": "Benchmark Status",
+          "type": "string"
+        },
+        "burnin_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Burnin Config Schema Version",
+          "type": "string"
+        },
+        "burnin_hours": {
+          "title": "Burnin Hours",
+          "type": "integer"
+        },
+        "length_stability_eue_tolerance_mwh": {
+          "title": "Length Stability Eue Tolerance Mwh",
+          "type": "number"
+        },
+        "length_stability_soc_tolerance_mwh": {
+          "title": "Length Stability Soc Tolerance Mwh",
+          "type": "number"
+        },
+        "provisional_status": {
+          "const": "provisional",
+          "default": "provisional",
+          "title": "Provisional Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "burnin_hours",
+        "length_stability_soc_tolerance_mwh",
+        "length_stability_eue_tolerance_mwh"
+      ],
+      "title": "StorageBurninConfig",
+      "type": "object"
+    },
+    "StorageEndOfCycleRechargeConfig": {
+      "additionalProperties": false,
+      "description": "W2/B6-2: the end-of-cycle recharge window (方法说明第三章(一)\n周期末回充约束, provisional). Disabled by default - enabling it\nfloors each unit's discharge inside the final ``window_hours`` of\nevery charge cycle at ``target_soc_fraction x energy_capacity``\n(energy for the next cycle; no charging is ever invented).",
+      "properties": {
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "end_of_cycle_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "End Of Cycle Schema Version",
+          "type": "string"
+        },
+        "provisional_status": {
+          "const": "provisional",
+          "default": "provisional",
+          "title": "Provisional Status",
+          "type": "string"
+        },
+        "target_soc_fraction": {
+          "default": 0.8,
+          "title": "Target Soc Fraction",
+          "type": "number"
+        },
+        "window_hours": {
+          "default": 4,
+          "title": "Window Hours",
+          "type": "integer"
+        }
+      },
+      "title": "StorageEndOfCycleRechargeConfig",
+      "type": "object"
+    },
+    "StorageSocConfig": {
+      "additionalProperties": false,
+      "description": "Typed storage SOC initialization configuration (methodology V0.4\n§6.3). Exactly one initialization mode; the burn-in section is\nrequired for stochastic_sample_burnin and forbidden otherwise; the\nS-13 explicit-initial-SOC escape hatch is only for specific tests or\nexplicit user configuration and never becomes the default warm-up.",
+      "properties": {
+        "burnin": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageBurninConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "end_of_cycle_recharge": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StorageEndOfCycleRechargeConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "explicit_initial_soc_mwh": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Explicit Initial Soc Mwh"
+        },
+        "initialization_mode": {
+          "$ref": "#/$defs/StorageSocInitializationMode"
+        },
+        "storage_soc_config_schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Storage Soc Config Schema Version",
+          "type": "string"
+        },
+        "warmup_max_cycles": {
+          "default": 5,
+          "title": "Warmup Max Cycles",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "initialization_mode"
+      ],
+      "title": "StorageSocConfig",
+      "type": "object"
+    },
+    "StorageSocInitializationMode": {
+      "description": "SOC initialization mode (methodology V0.4 §6.3).",
+      "enum": [
+        "weather_cycle_warmup",
+        "stochastic_sample_burnin",
+        "not_applicable"
+      ],
+      "title": "StorageSocInitializationMode",
+      "type": "string"
+    }
+  },
+  "$id": "schemas/run-config-1.0.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "chronology_mode": {
+            "const": "continuous_multiyear"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "soc_year_boundary_mode": {
+            "enum": [
+              "carry_over"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chronology_mode": {
+            "const": "independent_weather_years"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "soc_year_boundary_mode": {
+            "not": {
+              "enum": [
+                "carry_over"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_type": {
+            "const": "report"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "source_run_id": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "source_run_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_type": {
+            "enum": [
+              "mri",
+              "rmri"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "assessment_anchor": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "perturbation_dimension": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "assessment_anchor",
+          "perturbation_dimension"
+        ]
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "run_type": {
+              "enum": [
+                "mri",
+                "rmri"
+              ]
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "assessment_anchor": {
+            "type": "null"
+          },
+          "perturbation_dimension": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "capacity_value_type": {
+            "const": "marginal"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "baseline_portfolio_version": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "baseline_portfolio_version"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "allocation_type": {
+            "const": "governance_rule"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "allocation_rule_id": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "allocation_rule_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "run_type": {
+            "const": "elcc"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "method_config": {
+            "not": {
+              "type": "null"
+            }
+          }
+        },
+        "required": [
+          "method_config"
+        ]
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "run_type": {
+              "const": "elcc"
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "method_config": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "storage_soc_initialization_mode": {
+            "const": "not_applicable"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "method_config": {
+            "properties": {
+              "storage_soc": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "storage_soc_initialization_mode": {
+            "enum": [
+              "weather_cycle_warmup",
+              "stochastic_sample_burnin"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "method_config": {
+            "properties": {
+              "storage_soc": {
+                "not": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "chronology_mode": {
+            "const": "independent_weather_years"
+          },
+          "storage_soc_initialization_mode": {
+            "enum": [
+              "weather_cycle_warmup",
+              "stochastic_sample_burnin"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "soc_year_boundary_mode": {
+            "const": "reinitialize_with_configured_mode"
+          }
+        }
+      }
+    }
+  ],
+  "description": "Frozen run configuration (``run_config.yaml``).",
+  "properties": {
+    "allocation_rule_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Allocation Rule Id"
+    },
+    "allocation_type": {
+      "$ref": "#/$defs/AllocationType"
+    },
+    "assessment_anchor": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AssessmentAnchor"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "baseline_portfolio_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Baseline Portfolio Version"
+    },
+    "capacity_value_type": {
+      "$ref": "#/$defs/CapacityValueType"
+    },
+    "chronology_mode": {
+      "$ref": "#/$defs/ChronologyMode"
+    },
+    "method_config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ElccMethodConfig"
+        },
+        {
+          "$ref": "#/$defs/EfcMethodConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Method Config"
+    },
+    "method_profile": {
+      "title": "Method Profile",
+      "type": "string"
+    },
+    "normalization_basis_mwh_per_mw": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Normalization Basis Mwh Per Mw"
+    },
+    "parent_run_ids": {
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Parent Run Ids",
+      "type": "array"
+    },
+    "perturbation_dimension": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PerturbationDimension"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "primary_risk_metric": {
+      "$ref": "#/$defs/RiskMetric"
+    },
+    "random_seed": {
+      "title": "Random Seed",
+      "type": "integer"
+    },
+    "run_config_schema_version": {
+      "const": "1.0",
+      "title": "Run Config Schema Version",
+      "type": "string"
+    },
+    "run_mode": {
+      "$ref": "#/$defs/RunMode"
+    },
+    "run_type": {
+      "$ref": "#/$defs/RunType"
+    },
+    "scenario_bank_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Bank Id"
+    },
+    "scenario_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scenario Id"
+    },
+    "soc_year_boundary_mode": {
+      "$ref": "#/$defs/SocYearBoundaryMode"
+    },
+    "source_run_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Run Id"
+    },
+    "storage_soc_initialization_mode": {
+      "$ref": "#/$defs/StorageSocInitializationMode"
+    },
+    "weather_year_weight_set_id": {
+      "title": "Weather Year Weight Set Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_config_schema_version",
+    "run_mode",
+    "run_type",
+    "method_profile",
+    "primary_risk_metric",
+    "weather_year_weight_set_id",
+    "chronology_mode",
+    "storage_soc_initialization_mode",
+    "soc_year_boundary_mode",
+    "capacity_value_type",
+    "allocation_type",
+    "random_seed"
+  ],
+  "title": "run-config-1.0.json",
+  "type": "object",
+  "x-contract-version": "1.0"
+}

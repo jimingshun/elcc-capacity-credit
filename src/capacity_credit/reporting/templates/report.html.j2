@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">
+<title>测算结果报告 {{ view.result_id }}</title>
+<style>
+  :root { --max-width: 1000px; }
+  body { font-family: sans-serif; margin: 0; padding: 1em 2em; color: #1a1a1a; background: #fff; }
+  main { max-width: var(--max-width); margin: 0 auto; }
+  h1 { font-size: 1.4em; }
+  h2 { font-size: 1.1em; margin-top: 1.6em; border-bottom: 1px solid #ccc; }
+  .banner { background: #f8d7da; border: 1px solid #d43f3a; padding: 0.8em; font-weight: bold; margin-bottom: 1em; }
+  .banner-teaching { background: #fff3cd; border: 1px solid #b8860b; }
+  table { border-collapse: collapse; margin: 0.6em 0; width: 100%; }
+  th, td { border: 1px solid #999; padding: 0.3em 0.6em; text-align: left; font-size: 0.9em; }
+  th { background: #eee; }
+  .muted { color: #666; font-size: 0.85em; }
+  code { font-family: monospace; word-break: break-all; overflow-wrap: anywhere; }
+  @media print { body { padding: 0; } a { color: #000; } }
+</style>
+</head>
+<body>
+<main>
+{% if view.use_boundary_warning %}<div class="banner{% if view.use_boundary_code == 'g0_teaching' %} banner-teaching{% endif %}">{{ view.use_boundary_warning }}</div>{% endif %}
+
+<h1>测算结果报告（T24-A 轻量离线报告）</h1>
+<p class="muted">report_mapping_version: {{ view.report_mapping_version }} · 生成器: {{ view.report_generator_version }} · 结果状态: {{ view.result_status }}</p>
+
+<h2>结果状态</h2>
+<table>
+  <tr><th>result_status</th><td>{{ view.result_status }}</td></tr>
+  <tr><th>risk_convergence / search_convergence</th><td>{{ view.risk_convergence }} / {{ view.search_convergence }}</td></tr>
+  <tr><th>effective_data_grade</th><td>{{ view.effective_data_grade }}</td></tr>
+</table>
+
+<h2>结论摘要</h2>
+<table>
+  <tr><th>字段</th><th>值</th><th>单位</th><th>空值语义</th></tr>
+  {% for entry in view.conclusion_card %}
+  <tr data-field-id="{{ entry.field_id }}"><td>{{ entry.label }}</td><td>{{ entry.value if entry.value is not none else "" }}</td><td>{{ entry.unit or "" }}</td><td>{{ entry.null_status }}</td></tr>
+  {% endfor %}
+</table>
+
+<h2>运行与方法信息</h2>
+<table>
+  <tr><th>run_id</th><td><code>{{ view.run_id }}</code></td></tr>
+  <tr><th>result_id</th><td><code>{{ view.result_id }}</code></td></tr>
+  <tr><th>方法</th><td>{{ view.method }}</td></tr>
+  <tr><th>方法配置档</th><td>{{ view.method_profile }}</td></tr>
+  <tr><th>资源或组合标识</th><td>{{ view.resource_or_portfolio_id }}</td></tr>
+  <tr><th>主风险指标</th><td>{{ view.primary_risk_metric }}（{{ view.primary_risk_metric_unit }}）</td></tr>
+</table>
+
+{% set method_fields = [
+  "capacity_value_type", "reference_capacity_mw", "accredited_capacity_mw",
+  "capacity_credit_fraction", "capacity_credit_unit", "result_applicability"
+] %}
+{% if view.method in ("mri", "rmri") %}{% set method_fields = method_fields + ["rmri_status", "rmri_value", "mri_value"] %}{% endif %}
+<h2>容量信用/方法结果</h2>
+<table>
+  <tr><th>字段</th><th>值</th><th>单位</th><th>空值语义</th><th>审计原始值（raw_value）</th></tr>
+  {% for field in view.display_fields %}
+    {% if field.field_id in method_fields %}
+    <tr data-field-id="{{ field.field_id }}"><td>{{ field.label }}</td><td>{{ field.display_value }}</td><td>{{ field.display_unit or "" }}</td><td>{{ field.null_status }}</td><td class="muted">{{ field.raw_value if field.raw_value is not none else "" }}</td></tr>
+    {% endif %}
+  {% endfor %}
+</table>
+
+<h2>增强图表</h2>
+{% set risk_values = [view.base_risk, view.candidate_risk, view.matched_risk] %}
+{% set risk_nums = risk_values | select("number") | list %}
+{% if risk_nums %}
+<h3>基准/候选/匹配 主风险对比（{{ view.primary_risk_metric }}）</h3>
+{% set risk_max = risk_nums | max %}
+{% if risk_max > 0 %}
+<svg viewBox="0 0 480 180" width="100%" role="img" aria-label="基准/候选/匹配 主风险对比">
+  {% set risk_roles = {"base": view.base_risk, "candidate": view.candidate_risk, "matched": view.matched_risk} %}
+  {% for role in ("base", "candidate", "matched") %}
+    {% set value = risk_roles[role] %}
+    {% if value is not none %}
+    {% set height = (value / risk_max * 120) | round(1) %}
+    {% set xpos = 40 + loop.index0 * 140 %}
+    <g>
+      <rect x="{{ xpos }}" y="{{ 150 - height }}" width="80" height="{{ height }}" fill="#4a7abb" data-role="{{ role }}" data-value="{{ value }}"></rect>
+      <text x="{{ xpos + 40 }}" y="{{ 168 }}" text-anchor="middle" font-size="11">{{ role }}</text>
+      <text x="{{ xpos + 40 }}" y="{{ 140 - height }}" text-anchor="middle" font-size="10">{{ value }}</text>
+    </g>
+    {% endif %}
+  {% endfor %}
+  <line x1="30" y1="150" x2="460" y2="150" stroke="#666"></line>
+</svg>
+{% else %}
+<p class="muted">无有效图表数据：主风险对比不可用（数值非正或缺失）。</p>
+{% endif %}
+<p class="muted">单位：{{ view.primary_risk_metric_unit }}；数值与 machine-results 一致；缺失角色未绘制（not_applicable / not_computed 不显示为 0）。</p>
+{% else %}
+<p class="muted">无有效图表数据：主风险对比不可用。</p>
+{% endif %}
+
+{% set cap_items = [] %}
+{% for f in view.display_fields %}
+  {% if f.field_id in ("reference_capacity_mw", "accredited_capacity_mw") and f.raw_value is not none %}
+    {% set _ = cap_items.append({"id": f.field_id, "label": f.label, "value": f.raw_value}) %}
+  {% endif %}
+{% endfor %}
+{% if cap_items %}
+<h3>容量价值（认证容量 vs 参考容量）</h3>
+{% set cap_max = cap_items | map(attribute="value") | max %}
+{% if cap_max > 0 %}
+<svg viewBox="0 0 480 180" width="100%" role="img" aria-label="容量价值对比">
+  {% for item in cap_items %}
+    {% set height = (item.value / cap_max * 120) | round(1) %}
+    {% set xpos = 60 + loop.index0 * 220 %}
+    <g>
+      <rect x="{{ xpos }}" y="{{ 150 - height }}" width="120" height="{{ height }}" fill="#7a9b3c" data-field-id="{{ item.id }}" data-value="{{ item.value }}"></rect>
+      <text x="{{ xpos + 60 }}" y="{{ 168 }}" text-anchor="middle" font-size="11">{{ item.label }}</text>
+      <text x="{{ xpos + 60 }}" y="{{ 140 - height }}" text-anchor="middle" font-size="10">{{ item.value }}</text>
+    </g>
+  {% endfor %}
+  <line x1="30" y1="150" x2="460" y2="150" stroke="#666"></line>
+</svg>
+{% else %}
+<p class="muted">无有效图表数据：容量价值不可用。</p>
+{% endif %}
+<p class="muted">单位：MW；数值与 machine-results 一致。</p>
+{% else %}
+<p class="muted">无有效图表数据：容量价值不可用（本方法不生成容量价值字段）。</p>
+{% endif %}
+
+{% if view.search_trace and view.search_trace.rows %}
+{% set trace_pts = [] %}
+{% for row in view.search_trace.rows %}
+  {% if row.call_id is not none and row.capacity_mw is not none %}
+    {% set _ = trace_pts.append({"x": row.call_id, "y": row.capacity_mw}) %}
+  {% endif %}
+{% endfor %}
+{% if trace_pts | length >= 2 %}
+<h3>搜索轨迹：call_id 上的容量试探</h3>
+{% set x_min = trace_pts | map(attribute="x") | map("float") | min %}
+{% set x_max = trace_pts | map(attribute="x") | map("float") | max %}
+{% set y_min = trace_pts | map(attribute="y") | map("float") | min %}
+{% set y_max = trace_pts | map(attribute="y") | map("float") | max %}
+{% if x_max > x_min and y_max > y_min %}
+{% set ns = namespace(points="") %}
+<svg viewBox="0 0 480 180" width="100%" role="img" aria-label="搜索轨迹">
+  {% for pt in trace_pts %}
+    {% set xf = pt.x | float %}
+    {% set yf = pt.y | float %}
+    {% set px = 40 + (xf - x_min) / (x_max - x_min) * 380 %}
+    {% set py = 140 - (yf - y_min) / (y_max - y_min) * 110 %}
+    {% set ns.points = ns.points ~ (px | round(1)) ~ "," ~ (py | round(1)) ~ " " %}
+    <circle cx="{{ px | round(1) }}" cy="{{ py | round(1) }}" r="3" fill="#b04a4a" data-call-id="{{ xf | round(0) | int }}" data-value="{{ yf }}"></circle>
+  {% endfor %}
+  <polyline points="{{ ns.points }}" fill="none" stroke="#b04a4a" stroke-width="2"></polyline>
+  <line x1="30" y1="150" x2="460" y2="150" stroke="#666"></line>
+</svg>
+<p class="muted">单位：capacity_mw；数值与 machine-results/search_trace.csv 一致。</p>
+{% else %}
+<p class="muted">无有效图表数据：搜索轨迹不可绘制（容量无变化或样本不足）。</p>
+{% endif %}
+{% else %}
+<p class="muted">无有效图表数据：搜索轨迹不可用（不适用 / 未提供 / 点数不足）。</p>
+{% endif %}
+{% else %}
+<p class="muted">无有效图表数据：搜索轨迹不可用（不适用 / 未提供）。</p>
+{% endif %}
+
+{% if view.adequacy %}
+<h2>充裕度指标（总 {{ view.adequacy.total_rows }} 行，展示 {{ view.adequacy.displayed_rows }} 行）</h2>
+<table>
+  <tr><th>role</th><th>metric</th><th>value</th><th>unit</th><th>primary_metric</th><th>result_status</th></tr>
+  {% for row in view.adequacy.rows %}
+  <tr><td>{{ row.role }}</td><td>{{ row.metric }}</td><td>{{ row.value }}</td><td>{{ row.unit }}</td><td>{{ row.primary_metric }}</td><td>{{ row.result_status }}</td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+{% if view.search_trace %}
+<h2>搜索轨迹（总 {{ view.search_trace.total_rows }} 行，展示 {{ view.search_trace.displayed_rows }} 行）</h2>
+{% if view.search_trace.rows %}
+<table>
+  <tr><th>call_id</th><th>iteration</th><th>action</th><th>capacity_mw</th><th>reference_risk</th><th>trial_risk</th><th>difference_mean</th><th>estimate_mw</th><th>trace_status</th></tr>
+  {% for row in view.search_trace.rows %}
+  <tr><td>{{ row.call_id }}</td><td>{{ row.iteration }}</td><td>{{ row.action }}</td><td>{{ row.capacity_mw }}</td><td>{{ row.reference_risk }}</td><td>{{ row.trial_risk }}</td><td>{{ row.difference_mean }}</td><td>{{ row.estimate_mw }}</td><td>{{ row.trace_status }}</td></tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="muted">{{ view.search_trace.note }}</p>
+{% endif %}
+{% endif %}
+
+{% if view.risk_events %}
+<h2>风险事件（总 {{ view.risk_events.total_rows }} 行，展示前 {{ view.risk_events.displayed_rows }} 行）</h2>
+<p class="muted">完整风险事件以 <code>{{ view.risk_events.source }}</code> 为权威来源。</p>
+<table>
+  <tr><th>event_time</th><th>location</th><th>deficiency_power_mw</th><th>deficiency_energy_mwh</th><th>scenario_id</th><th>sample_index</th></tr>
+  {% for row in view.risk_events.rows %}
+  <tr><td>{{ row.event_time }}</td><td>{{ row.location }}</td><td>{{ row.deficiency_power_mw }}</td><td>{{ row.deficiency_energy_mwh }}</td><td>{{ row.scenario_id }}</td><td>{{ row.sample_index }}</td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<h2>警告与限制</h2>
+{% if view.warnings %}
+<table>
+  <tr><th>code</th><th>severity</th><th>message</th></tr>
+  {% for w in view.warnings %}
+  <tr><td>{{ w.code }}</td><td>{{ w.severity }}</td><td>{{ w.message }}</td></tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>无正式警告。</p>
+{% endif %}
+{% if view.blocking_diagnostics %}
+<p class="muted">阻断性诊断：{{ view.blocking_diagnostics | join(", ") }}</p>
+{% endif %}
+{% if view.report_diagnostics %}
+<table>
+  <tr><th>code</th><th>severity</th><th>message</th></tr>
+  {% for d in view.report_diagnostics %}
+  <tr><td>{{ d.code }}</td><td>{{ d.severity }}</td><td>{{ d.message }}</td></tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+{% if view.business_notes %}
+<h2>{{ view.business_notes.get("method_label", "") or "业务解读" }}（业务阅读版）</h2>
+<p class="muted">以下为确定性模板生成的业务解读，基于本运行的正式结果与冻结输入；机器字段、单位与警告以本报告上方为准。</p>
+{% for section in view.business_notes.get("sections", []) %}
+<h3>{{ section.heading }}</h3>
+{% for paragraph in section.get("paragraphs", []) %}
+<p>{{ paragraph }}</p>
+{% endfor %}
+{% if section.table %}
+<table>
+  <tr>{% for column in section.table.columns %}<th>{{ column }}</th>{% endfor %}</tr>
+  {% for row in section.table.rows %}
+  <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endfor %}
+{% endif %}
+
+<h2>复现身份与源产物</h2>
+<table>
+  <tr><th>rerun_capability</th><td>{{ view.reproducibility.get("rerun_capability", "") }}</td></tr>
+  <tr><th>缺失复现输入</th><td>{{ view.reproducibility.get("missing_reproducibility_inputs", []) | join(", ") }}</td></tr>
+  <tr><th>inputs_hash</th><td><code>{{ view.reproducibility.get("inputs_hash", "") }}</code></td></tr>
+  <tr><th>config_hash</th><td><code>{{ view.reproducibility.get("config_hash", "") }}</code></td></tr>
+  <tr><th>software_version</th><td>{{ view.reproducibility.get("software_version", "") }}</td></tr>
+</table>
+<table>
+  <tr><th>源产物（相对名）</th><th>SHA-256</th><th>大小</th></tr>
+  {% for record in view.source_files.values() | sort(attribute="name") %}
+  <tr><td><code>{{ record.name }}</code></td><td><code>{{ record.sha256 }}</code></td><td>{{ record.size }}</td></tr>
+  {% endfor %}
+</table>
+</main>
+</body>
+</html>
