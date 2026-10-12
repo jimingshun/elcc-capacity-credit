@@ -10,7 +10,7 @@ from capacity_credit.webapp_routes import route
 
 @route("GET", "/api/results/recent")
 def list_recent(h: Any, qs: dict, body: Any) -> None:
-    # 用户2026-09-17裁决：首页「最近结果」只索引最近3次
+    # 用户2026-09-17：首页「最近结果」只索引最近3次
     rows = result_index_service.list_unified_results(
         h._service(), per_project_limit=5, total_limit=3
     )

@@ -4,7 +4,7 @@ const ARCH_STRIP = `
   <div style="display:grid;grid-template-columns:1fr;gap:6px;font-size:12.5px">
     <div><b>参数底座</b>：<span class="tag ok">项目管理已接通</span> <span class="tag plan">02 参数配置中心（演示）</span></div>
     <div><b>核心测算引擎</b>：<span class="tag ok">供给5项＋充裕度已接通</span> <span class="tag plan">05 年度容量补偿结算（演示/规划）</span></div>
-    <div><b>市场仿真</b>：<span class="tag ok">①—⑦ 出清内核已接通（Q-M1—M6 已裁决）</span> <span class="tag lock">履约考核仍为演示口径</span></div>
+    <div><b>市场仿真</b>：<span class="tag ok">①—⑦ 出清内核已接通</span> <span class="tag lock">履约考核仍为演示口径</span></div>
   </div>
 </div>`;
 function viewHome(){
@@ -42,7 +42,7 @@ function viewHome(){
       </div>
       <div class="entry">
         <h3>容量市场仿真 <span class="tag lock">市场模式</span> <span class="tag ok">出清内核已接通</span></h3>
-        <p>需求曲线 × 供给报价 → 出清过程的情景仿真（Q-M1—M6 裁决定案：统一出清价、单区、市场力披露不阻断；履约考核仍为演示口径）。</p>
+        <p>需求曲线 × 供给报价 → 出清过程的情景仿真（统一出清价、单区、市场力披露不阻断；履约考核仍为演示口径）。</p>
         <div id="home-ready-market" class="loading">就绪度读取中…</div>
         <div class="foot"><span class="mono-note">已接通 7｜演示 1</span><button class="btn" onclick="switchMode('mkt')">切换并进入</button></div>
       </div>

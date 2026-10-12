@@ -83,7 +83,7 @@ class ArtifactManifest(BaseModel):
     run_id: uuid.UUID
     source_run_id: uuid.UUID | None = None
     result_id: uuid.UUID
-    # Q-D1（2026-10-10 裁决）：报告映射契约升 1.1（risk_events 增
+    # Q-D1：报告映射契约升 1.1（risk_events 增
     # duration_hours）；工件清单如实携带源映射版本（1.0/1.1 均合法）
     report_mapping_version: Literal["1.0", "1.1"]
     confidentiality_level: ConfidentialityLevel

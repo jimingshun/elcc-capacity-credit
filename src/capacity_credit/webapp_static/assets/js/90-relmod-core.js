@@ -270,7 +270,7 @@ function rmWeightSubCardHTML(cov,cur,years){
     <div style="margin-top:8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
       <button class="btn" onclick="rmDownloadEqualWeights()">改成各年平均看待</button>
       <span class="fh">下载占比表 → 到「基础数据管理」上传 → 审批冻结后生效（占比只能在数据链里改，页面不直接保存）。</span></div>
-    <details class="disc"><summary>技术依据</summary><div class="body">「改成各年平均看待」调用覆盖投影的 preview_equal_weights（服务端 default_equal_weights 生成器：source_id=equal_weight_default、data_status=assumed，血缘留痕），下载为 weather_year_weight_sets.csv（模板目录同款表头 record_id,weight_set_id,weather_year,weight,source_id,data_status,note；record_id 由页面自造 EQW+年份）；上传后由 DQ-21 校验把关（覆盖＝声明年、合计＝100%、非负、source_id 必填）。页面不做占比直接保存（v1 裁决：保存必须走导入链哈希/授权留痕）。</div></details>
+    <details class="disc"><summary>技术依据</summary><div class="body">「改成各年平均看待」调用覆盖投影的 preview_equal_weights（服务端 default_equal_weights 生成器：source_id=equal_weight_default、data_status=assumed，血缘留痕），下载为 weather_year_weight_sets.csv（模板目录同款表头 record_id,weight_set_id,weather_year,weight,source_id,data_status,note；record_id 由页面自造 EQW+年份）；上传后由 DQ-21 校验把关（覆盖＝声明年、合计＝100%、非负、source_id 必填）。页面不做占比直接保存（v1：保存必须走导入链哈希/授权留痕）。</div></details>
   </details>`;
 }
 async function rmDownloadEqualWeights(){

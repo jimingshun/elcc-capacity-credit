@@ -1,6 +1,4 @@
-"""容量市场仿真出清（Q-M1—Q-M6 裁决 2026-10-11；主责设计
-docs/plans/2026-10-11-market-clearing-kernel-design.md 与
-2026-09-16-market-simulation-design.md §11 裁决记录）.
+"""容量市场仿真出清.
 
 分层（镜像结算/系数模块的成熟模式）：
 
@@ -35,7 +33,7 @@ from capacity_credit.application.atomic_io import (
     stable_dump,
 )
 
-# Q-M3 裁决：默认 VRR 形状（容量比, 价格比）——PJM 历史形状参照，调用方可改
+# Q-M3：默认 VRR 形状（容量比, 价格比）——PJM 历史形状参照，调用方可改
 DEFAULT_VRR_ANCHORS: tuple[tuple[float, float], tuple[float, float], tuple[float, float]] = (
     (0.97, 1.75),
     (1.00, 1.30),
@@ -152,7 +150,7 @@ def build_demand_curve(
         "quantity_deviation_percent": deviation,
         "points": points,
         "note": (
-            "VRR 三点折线（Q-M3 裁决；锚＝目标容量×Net CONE）；需求量在曲线"
+            "VRR 三点折线（Q-M3 ；锚＝目标容量×Net CONE）；需求量在曲线"
             "两端饱和（单区统一出清的诚实简化）；价格领口未启用时曲线价域"
             "即锚点价域"
         ),

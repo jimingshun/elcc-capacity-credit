@@ -283,7 +283,7 @@ def capacity_gap_preview(h: Any, qs: dict, body: Any) -> None:
                  "message": "引用运行不是目标可靠容量结果（method 不符）"},
             )
         if cv.get("solver_caliber") == "adjust_load":
-            # Q-D4（2026-10-10 裁决）：调整负荷口径的结果＝目标负荷水平
+            # Q-D4：调整负荷口径的结果＝目标负荷水平
             # （λ×峰荷），不是容量需求——两口径并列不可互比，引用诚实拒绝
             return h._json(
                 400,
@@ -337,7 +337,7 @@ def _resolve_coefficient_references(h: Any, payload: dict) -> tuple[dict | None,
             method == "demand_target_capacity"
             and cv.get("solver_caliber") == "adjust_load"
         ):
-            # Q-D4（2026-10-10 裁决）：调整负荷口径＝目标负荷水平（λ×峰荷），
+            # Q-D4：调整负荷口径＝目标负荷水平（λ×峰荷），
             # 非容量需求——供需系数分子只认「调整完美容量」口径点值
             return {"kind": "invalid_input",
                     "message": "引用的目标容量结果是「调整负荷」口径（目标负荷"
@@ -371,7 +371,7 @@ def _resolve_coefficient_references(h: Any, payload: dict) -> tuple[dict | None,
 
 @route("POST", "/api/demand/coefficient/preview")
 def coefficient_preview(h: Any, qs: dict, body: Any) -> None:
-    """Step 2 Stage C（C-D5，需求类设计 §5＋Q-D3 六项裁决）：供需系数
+    """Step 2 Stage C（C-D5，需求类设计 §5＋Q-D3 六项）：供需系数
     公式 v1＝clamp(目标可靠容量 ÷ 核定可靠容量, 0.0, 1.0)，年度口径。
     分子引用＝demand_target_capacity 已收敛点值；分母引用＝elcc/efc
     认可容量点值；未收敛/方法不符诚实 400。引用路径附 project+run 血缘。
@@ -396,7 +396,7 @@ def coefficient_preview(h: Any, qs: dict, body: Any) -> None:
 
 @route("POST", "/api/demand/coefficient/freeze")
 def coefficient_freeze(h: Any, qs: dict, body: Any) -> None:
-    """Step 3 S0（C-CF1，Q-S6 裁决②）：供需系数冻结为可引用正式结果。
+    """Step 3 S0（C-CF1，Q-S6 ）：供需系数冻结为可引用正式结果。
     显式用户动作（确认人必填）；全部校验先于副作用——类型锁/已完成门/
     确认人/输入无效一律 400 且不落盘；冻结记录不可变（manifest-last），
     绑定后项目 completed（一个项目一个正式结果，二次冻结诚实拒绝）。"""

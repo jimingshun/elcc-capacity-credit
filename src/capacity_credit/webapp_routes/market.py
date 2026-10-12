@@ -1,5 +1,4 @@
-"""容量市场仿真接口（/api/market/*）。Q-M1—Q-M6 裁决（2026-10-11）
-落地；主责设计 docs/plans/2026-10-11-market-clearing-kernel-design.md。
+"""容量市场仿真接口（/api/market/*）。
 
 镜像既有纪律：引用经身份环核验（目标容量＝demand_target_capacity 已收敛
 点值且非调整负荷口径；Net CONE＝cost_net_cone 已完成点值）；台账版本化；

@@ -1,4 +1,4 @@
-"""Market business report export (Q-M6 裁决 2026-10-11).
+"""Market business report export (Q-M6  2026-10-11).
 
 已冻结出清结果的业务投影：Excel＋HTML，与成本/结算报告同款纪律（内存
 构建、不可变文件、清单最后写、同身份重放按哈希比对）。报告只投影冻结

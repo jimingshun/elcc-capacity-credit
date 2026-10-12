@@ -206,7 +206,7 @@ def batches_derive_point(h: Any, qs: dict, body: Any) -> None:
                 },
             )
     if point_status == "待确认":
-        # W3 待确认续推（2026-09-22 工单 §4）：待确认 ⇒ 派生与
+        # 待确认 ⇒ 派生与
         # 审批冻结在第一轮已完成且记录就在点位上；续推只补齐
         # 样本集准备与身份钉住，再走到待运行——不重复派生
         # （derive_data_version 会产出第二个派生批次），不新增

@@ -33,7 +33,7 @@ function viewSettle(){
   const head = `
   <div class="ptitle">年度容量补偿结算</div>
   <div class="psub">一个结算项目对应一个年度：月度填报 → 检查 → 试算 → 锁定；12/12 全锁定后出年度汇总正式结果。</div>
-  <div class="hintbar warn">本模块为<b>规划中</b>能力（当前仅演示口径）：正式计算前置＝补偿价表来源（Q-S1）确认；<b>供需系数口径（Q-D3）已裁决，已转正式口径（公式 v1，04 页测算）</b>，本页演示数字仍为示例口径；开放问题未闭环前不产生正式金额。</div>
+  <div class="hintbar warn">本模块为<b>规划中</b>能力（当前仅演示口径）：正式计算前置＝补偿价表来源确认；<b>供需系数口径已转正式（公式 v1，04 页测算）</b>，本页演示数字仍为示例口径；开放问题未闭环前不产生正式金额。</div>
   <div class="otabs">
     <button class="${SETTLETAB===0?'on':''}" onclick="SETTLETAB=0;rerender()">总览与就绪度</button>
     <button class="${SETTLETAB===1?'on':''}" onclick="SETTLETAB=1;rerender()">月度结算演示（演示口径）</button>
@@ -89,7 +89,7 @@ function viewSettleCreate(){
   const f = SETTLEBENCH.form;
   return `
   <div class="card"><h3>新建年度结算项目</h3>
-    <div class="hintbar">一个年度只允许一个正式结算项目（Q-S6 裁决）；基础信息七字段<b>创建即锁定</b>，改口径请复制新项目。</div>
+    <div class="hintbar">一个年度只允许一个正式结算项目；基础信息七字段<b>创建即锁定</b>，改口径请复制新项目。</div>
     <div class="fgrid">
       <div class="fld"><label><b>项目名称</b>（必填）</label><input id="sb-name" value="${esc(f.name||'')}"></div>
       <div class="fld"><label><b>结算年度</b>（≥2020）</label><input class="num" id="sb-year" value="${esc(f.year||'2027')}"></div>
@@ -137,7 +137,7 @@ function viewSettleBenchProject(){
       <tr><td>规则依据</td><td>${esc(c.rule_notes)}</td></tr></table></div>
   <div class="card"><h3>年度状态（已锁定进度 N/12 动态读取）</h3>
     <div id="sb-months" class="loading">读取中…</div></div>
-  <div class="card"><h3>补偿价表（Q-S1：录入制＋政策来源必填）</h3>
+  <div class="card"><h3>补偿价表（录入制＋政策来源必填）</h3>
     ${pt.current?`<table class="grid"><tr><th>版本</th><th class="r">标准（元/kW·年）</th><th>分类标准（元/kW·年）</th><th>政策来源</th><th>规则版本</th><th>录入时间</th></tr>
       ${pt.history.map(h=>`<tr><td class="num">v${h.version}${h.version===(pt.current&&pt.current.version)?' ←当前':''}</td><td class="r num">${fmt(h.compensation_standard,2)}</td><td>${h.by_resource_type?esc(Object.entries(h.by_resource_type).map(([k,v])=>k+' '+v).join('；')):'—'}</td><td>${esc(h.policy_source)}</td><td>${esc(h.rule_version)}</td><td>${esc(String(h.recorded_at||'').slice(0,10))}</td></tr>`).join('')}</table>`
     :'<div class="hintbar warn">尚未录入补偿价表——数值与政策来源（文号/条文）均必填，无来源不得进入正式链路。</div>'}

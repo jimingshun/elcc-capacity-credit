@@ -263,7 +263,7 @@ def _run_computation(
     stage("baseline_risk", "complete")
 
     stage("target_search", "start")
-    # Q-D4（2026-10-10 裁决）：调整负荷口径＝λ 轴搜索——供给侧全部冻结，
+    # Q-D4：调整负荷口径＝λ 轴搜索——供给侧全部冻结，
     # 逐点把原生负荷曲线乘 λ（表副本喂既有管线；不改 ResourceRunConfig、
     # 不改内核、不改随机流）；点值换算为负荷水平 MW（λ×峰荷）后进合同。
     load_scale_factor: float | None = None

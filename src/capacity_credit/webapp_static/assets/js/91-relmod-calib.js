@@ -34,7 +34,7 @@ function rmCalibCreateForm(el){
     <div class="btnrow" style="display:flex;justify-content:flex-end;margin-top:10px">
       <button class="btn" onclick="RM.step=1;renderRelMod()">← 返回步骤 01</button>
       <button class="btn pri" id="rc-create" onclick="rmCalibCreate()">建立标定任务并先测现状 →</button></div>
-    <details class="disc"><summary>技术依据</summary><div class="body">CAL-01 判据指标可选 LOLE/LOLH/EUE/NEUE；CAL-02 目标值必须显式给定、系统无默认；CAL-03 容差带默认 ±5%；DR-01b 批次级授权：每档测算自动留痕——授权#N（本批第 N 次授权动作）＋规则＋参数＋父版本哈希，页面不再询问授权人（2026-09-19 用户裁决，authorized_by 只记次数不记人名）。标定每档是充裕度内核研究子运行（research_point），不改变"一项目一正式结果"（2026-09-20 P0 裁决：类型锁只锁正式测算入口）。</div></details>
+    <details class="disc"><summary>技术依据</summary><div class="body">判据指标可选 LOLE/LOLH/EUE/NEUE；目标值必须显式给定、系统无默认；容差带默认 ±5%。批次级授权：每档测算自动留痕——授权#N（本批第 N 次授权动作）＋规则＋参数＋父版本哈希，页面不再询问授权人。标定每档是充裕度内核研究子运行，不改变"一项目一正式结果"。</div></details>
   </div>`;
   const wire=()=>{ const t=document.getElementById('rc-target');
     document.getElementById('rc-create').disabled = !t.value.trim(); };
@@ -137,7 +137,7 @@ async function rmCalibPanel(){
           <td class="r">${v==null?'—':esc(fmt(v,3))}</td><td>${v==null?'—':vt}</td>
           <td><span class="tag ${p.status==='完成'?'ok':p.status==='失败'?'lock':'plan'}">${p.status==='待派生'?'待准备':p.status==='待确认'?'准备中':p.status==='待运行'?'测算中':p.status==='完成'?'已完成':'未成功'}</span></td>
           <td class="mono-note">${p.run_ref?'run '+esc(String(p.run_ref).slice(0,8)):''}${p.diagnosis?'｜'+esc(p.diagnosis):''}</td></tr>`;}).join('')}</table></div></details>
-    <details class="disc"><summary>技术依据</summary><div class="body">「按建议测这一档」在前端串 追加→派生→发起→轮询→收尾（契约 §4：append-probe／derive-point／point-run／runs/status／point-finalize，不新增后端编排）；最多 8 轮（CAL-04/05）、各轮同种子同精度（CAL-06）、引擎收敛判定不放宽（CAL-07）；授权留痕＝授权#N（本批第 N 次授权动作，前端按试算记录计数，2026-09-19 裁决）。</div></details>
+    <details class="disc"><summary>技术依据</summary><div class="body">「按建议测这一档」在前端串 追加→派生→发起→轮询→收尾（不新增后端编排）；最多 8 轮、各轮同种子同精度、引擎收敛判定不放宽；授权留痕＝授权#N（本批第 N 次授权动作，前端按试算记录计数）。</div></details>
     </div>`;
     /* ④ 夹逼图（收敛/失败后由结论卡取代主视图） */
     if(!converged&&!failed){
@@ -275,7 +275,7 @@ async function rmCalibChainOne(){
   }catch(e){ C.busy=false; C.chainStep=0; C.lastErr=e.message; flash('这一档没有走完：'+e.message); rmCalibPanel(); }
 }
 function rmCalibRetry(){ if(RM.calib) RM.calib.lastErr=null; rmCalibChainOne(); }
-/* W3 待确认续推（工单 2026-09-22 §4）：链条自身已把待确认点位交给
+/* 待确认续推：链条自身已把待确认点位交给
    derive-point（现按既有派生记录续推而非拒绝），按钮＝把链条再点一次 */
 function rmCalibResumePoint(){ rmCalibChainOne(); }
 function rmCalibRefresh(){ rmCalibPanel(); }

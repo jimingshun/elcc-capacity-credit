@@ -137,7 +137,7 @@ async function loadResultRiskEvents(projectRef, runRef){
     const rv=await jget('/api/runs/report-view?project='+encodeURIComponent(projectRef)+'&run='+encodeURIComponent(runRef));
     const ev=rv.risk_events;
     if(!ev){ el.innerHTML='<div class="fh">本次运行无风险事件明细（或该方法不产生事件表）。</div>'; return; }
-    // Q-D1（2026-10-10 裁决）：缺供持续时间汇总（分年聚合＋跨年加权，
+    // Q-D1：缺供持续时间汇总（分年聚合＋跨年加权，
     // 与四指标同一套年份占比；压力年不参与加权）
     const ds=rv.risk_event_duration_summary;
     let durationBlock='';

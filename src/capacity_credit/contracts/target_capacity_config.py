@@ -1,8 +1,7 @@
 """Target-capacity application configuration contract (Step 2 Stage A).
 
 需求类设计 §3（主责口径）的瘦合同：来源充裕度项目引用（血缘）、绝对目标
-（LOLE/EUE 二选一，目标值>0）、求解口径单选（本轮仅 adjust_perfect_capacity，
-调整负荷口径待 Q-D4——用户 2026-09-29 裁决 R2 先不做）、搜索区间与容差。
+（LOLE/EUE 二选一，目标值>0）、求解口径单选、搜索区间与容差。
 
 与 EFC 合同的关系：正式 ``RunConfig`` 不携带 method_config（本方法不走
 elcc/efc 的 method_config 联合类型）；类型化配置整体冻结为运行目录内的
@@ -107,7 +106,7 @@ class TargetCapacityTargetSpec(BaseModel):
 class TargetCapacitySearchSpec(BaseModel):
     """Search bounds and stopping rule（需求类设计 §3.1）.
 
-    两轴互斥（Q-D4 裁决 2026-10-10）：MW 轴＝调整完美容量口径；
+    两轴互斥（Q-D4  2026-10-10）：MW 轴＝调整完美容量口径；
     λ 轴＝调整负荷口径（负荷缩放系数，无量纲）。口径决定哪组必填、
     另一组必须缺席（应用配置级校验，见 TargetCapacityApplicationConfig）。
     """
@@ -117,7 +116,7 @@ class TargetCapacitySearchSpec(BaseModel):
     lower_bound_mw: float | None = Field(default=None, ge=0.0)
     upper_bound_mw: float | None = Field(default=None, gt=0.0)
     capacity_tolerance_mw: float | None = Field(default=None, gt=0.0)
-    # Q-D4（2026-10-10 裁决）：调整负荷口径的 λ 轴（无量纲负荷缩放系数）
+    # Q-D4：调整负荷口径的 λ 轴（无量纲负荷缩放系数）
     lower_bound_load_scale: float | None = Field(default=None, gt=0.0)
     upper_bound_load_scale: float | None = Field(default=None, gt=0.0)
     load_scale_tolerance: float | None = Field(default=None, gt=0.0)
@@ -175,7 +174,7 @@ class TargetCapacityApplicationConfig(BaseModel):
     target: TargetCapacityTargetSpec
     search: TargetCapacitySearchSpec
     # 求解口径单选（强制显式，无默认——提示词9.2/需求类设计 §3.1）。
-    # Q-D4 裁决（2026-10-10）：adjust_load 开放——供给冻结、原生负荷曲线
+    # Q-D4：adjust_load 开放——供给冻结、原生负荷曲线
     # 保形缩放（λ 轴搜索）；与 adjust_perfect_capacity 并列、不可互比。
     caliber: Literal["adjust_perfect_capacity", "adjust_load"]
 

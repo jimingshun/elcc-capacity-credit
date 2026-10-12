@@ -13,7 +13,7 @@ Four null semantics are kept distinct (never collapsed to "" or 0):
 - missing: null with no not_applicable status (not computed / absent);
 - not_converged: result_status == not_converged (no midpoint used).
 
-1.1（Q-D1 裁决 2026-10-10）：risk_events 白名单与 parquet 模式新增
+1.1（Q-D1  2026-10-10）：risk_events 白名单与 parquet 模式新增
 duration_hours（事件持续小时，正整数）；report_model 兼容读 1.0。
 """
 

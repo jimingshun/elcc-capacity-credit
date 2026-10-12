@@ -209,7 +209,7 @@ def search_target_capacity(
 
 @dataclass
 class TargetLoadScaleSearchResult:
-    """Q-D4（2026-10-10 裁决）：调整负荷口径的诚实二分结果（λ 轴）。
+    """Q-D4：调整负荷口径的诚实二分结果（λ 轴）。
 
     estimate_scale＝满足目标的最大 λ（保守取区间下端——该点风险已验证
     ≤ 目标）；换算负荷水平 MW 由调用方用峰荷完成（本模块不掺单位）。

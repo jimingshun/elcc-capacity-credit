@@ -9,7 +9,7 @@
   **未提供铭牌时该键缺失（不补零、不冒充可得）**
 - 两口径**分别显示**，不得混算互替
 - 构成分解＝退役/新增/目标−峰荷三项**测算事实并列**（不生成归因判断——
-  四层结论模型之「分析判断」留人工审核）；分资源构成（Q-D2 裁决
+  四层结论模型之「分析判断」留人工审核）；分资源构成（Q-D2 
   2026-10-10）＝现有核定按资源类型分组求和＋占比，**构成分解非缺供
   责任分摊**；未填报的构成合计与核定差额如实披露（不阻断——本服务
   为确定性算术零副作用）
@@ -21,7 +21,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-# Q-D2 裁决（2026-10-10）：供给侧资源类型枚举（联络线属供给侧冻结资源，
+# Q-D2：供给侧资源类型枚举（联络线属供给侧冻结资源，
 # 与需求类设计 §8 口径一致）
 _RESOURCE_TYPES_GAP = (
     "coal", "gas", "hydro", "storage", "solar", "wind", "intertie", "other",
@@ -51,7 +51,7 @@ class CapacityGapInput(BaseModel):
     target_year: int
     accredited_source_note: str = ""
     peak_load_source_note: str = ""
-    # Q-D2（2026-10-10 裁决）：可选分资源构成（resource_type→核定 MW；
+    # Q-D2：可选分资源构成（resource_type→核定 MW；
     # 取各资源 ELCC/EFC 正式结果点值，未核定类型不填报）
     resource_composition: list[dict[str, Any]] | None = Field(default=None)
 
@@ -140,7 +140,7 @@ def compute_capacity_gap(payload: dict[str, Any]) -> dict[str, Any]:
         out["nameplate_margin"] = round(
             (data.nameplate_capacity_mw - data.peak_load_mw) / data.peak_load_mw, 8
         )
-    # Q-D2（2026-10-10 裁决）：构成分解（占比），非缺供责任分摊
+    # Q-D2：构成分解（占比），非缺供责任分摊
     composition = _validated_composition(data.resource_composition)
     if composition is not None:
         total = round(sum(mw for _t, mw in composition), 6)

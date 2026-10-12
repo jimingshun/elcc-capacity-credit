@@ -1534,7 +1534,7 @@ class WorkbenchService:
                 if method == "demand_target_capacity":
                     # Step 2 Stage A：目标容量语义进投影（与 ELCC/EFC 同一
                     # capacity_view 透传通道；点值 None＝未收敛不给数）。
-                    # Q-D4（2026-10-10 裁决）：adjust_load 口径下
+                    # Q-D4：adjust_load 口径下
                     # target_capacity_mw＝目标负荷水平（λ×峰荷），
                     # load_scale_factor＝λ——页面/引用方据此区分语义
                     capacity_view = {

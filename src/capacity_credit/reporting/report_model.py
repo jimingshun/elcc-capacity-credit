@@ -128,7 +128,7 @@ class ReportView:
     weather_year_metrics: TableView | None = None
     # risk events (bounded)
     risk_events: TableView | None = None
-    # Q-D1（2026-10-10 裁决）：缺供持续时间汇总（分年聚合＋跨年加权
+    # Q-D1：缺供持续时间汇总（分年聚合＋跨年加权
     # 汇总，与四指标同一权重集；压力年不参与加权）；None＝无事件表
     risk_event_duration_summary: dict[str, Any] | None = None
     # search trace (bounded / not_applicable)
@@ -307,7 +307,7 @@ def _bounded_rows(
 
 
 # ---------------------------------------------------------------------
-# Q-D1（2026-10-10 裁决）：缺供持续时间汇总（分年聚合＋跨年加权）
+# Q-D1：缺供持续时间汇总（分年聚合＋跨年加权）
 # ---------------------------------------------------------------------
 
 

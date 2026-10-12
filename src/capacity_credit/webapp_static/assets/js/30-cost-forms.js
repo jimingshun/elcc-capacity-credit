@@ -76,7 +76,7 @@ const zoneOptions = (prov,cur)=>{
   return Object.keys(CATALOG.zones).filter(k=>k.startsWith(prefix))
     .map(k=>{const z=k.slice(prefix.length);return `<option value="${esc(z)}" ${z===cur?'selected':''}>${esc(z)}（系数 ${CATALOG.zones[k]}）</option>`;}).join('');
 };
-/* 地区选择控件（用户2026-09-17三次裁决）：全国省份均可选＋当前省
+/* 地区选择控件：全国省份均可选＋当前省
    分区＋自定义输入；服务端对gross地区仅必填校验，不限制目录 */
 const regionZones = (prov)=>{
   if(!CATALOG) return [];

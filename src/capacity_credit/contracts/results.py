@@ -153,7 +153,7 @@ class MethodResult(BaseModel):
     criterion_mode: str | None = None
     # Step 2 Stage A（需求类设计 §3.2）: the absolute-target search fields.
     # target_risk_value = the declared LOLE/EUE target; solver_caliber is
-    # the explicitly chosen adjustment axis (Q-D4 裁决 2026-10-10:
+    # the explicitly chosen adjustment axis (Q-D4  2026-10-10:
     # adjust_load 开放——λ 轴，供给冻结、负荷保形缩放); source_* carry
     # the lineage of the completed adequacy run the search stood on.
     target_risk_value: float | None = None
@@ -343,7 +343,7 @@ class MethodResult(BaseModel):
             raise ValueError(
                 "not-converged demand_target_capacity must not carry a point value"
             )
-        # Q-D4（2026-10-10 裁决）：调整负荷口径的有效结果必带 λ；
+        # Q-D4：调整负荷口径的有效结果必带 λ；
         # 其余口径禁填（口径字段不混用）
         if self.solver_caliber == "adjust_load":
             if self.result_status in (ResultStatus.VALID, ResultStatus.VALID_WITH_WARNING):

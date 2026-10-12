@@ -1,11 +1,11 @@
 """年度结算项目骨架（Step 3 S1-M1；主责设计 2026-09-16-annual-settlement-design.md §2/§5）.
 
 创建：七字段基础信息创建即写入并锁定（`settlement/year_config.json`，
-原子写＋不可变）＋**年度唯一门**（Q-S6 裁决①：同工作区同年度已存在非
+原子写＋不可变）＋**年度唯一门**（Q-S6：同工作区同年度已存在非
 归档结算项目→诚实拒绝并点名）；幂等重试（同 request_id 返回同一项目，
 不误触唯一门）。
 
-价表（Q-S1 裁决：录入制＋强制来源）：`settlement/price_table/` 版本化
+价表（Q-S1：录入制＋强制来源）：`settlement/price_table/` 版本化
 （vNNN.json 不可变＋manifest 最后写入记录 current 与历史）；数值>0、
 政策来源必填、rule_version 必填；重录＝新版本，历史永不覆盖。
 
@@ -109,7 +109,7 @@ def _settlement_projects(registry: dict[str, Any]) -> list[dict[str, Any]]:
 def _year_unique_gate(
     workspace_root: Path, registry: dict[str, Any], year: int, exclude_ref: str | None = None
 ) -> None:
-    """Q-S6 裁决①：同工作区同年度只允许一个非归档结算项目。"""
+    """Q-S6：同工作区同年度只允许一个非归档结算项目。"""
     for entry in _settlement_projects(registry):
         ref = str(entry.get("project_ref") or "")
         if not ref or ref == exclude_ref:
@@ -156,7 +156,7 @@ def create_settlement_project(
                     "request_id": request_id,
                     "settlement_year": existing["settlement_year"],
                 }
-            break  # request_id 在但配置/类型不符 → 交回 create_project 裁决
+            break  # request_id 在但配置/类型不符 → 交回 create_project 
     _year_unique_gate(root, registry, int(data["settlement_year"]))
     try:
         handle = create_project(

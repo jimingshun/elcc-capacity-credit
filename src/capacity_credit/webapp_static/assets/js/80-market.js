@@ -15,7 +15,7 @@ function viewDemand(){
       <details class="disc"><summary>查看字段设计（需求类设计§4）</summary><div class="body">输入：目标可靠容量（引用已完成目标容量结果或显式输入）＋核定可靠容量＋预计退役＋已确定新增＋峰值负荷＋铭牌合计（可选）；输出：缺口/盈余、两口径备用裕度、退役/新增/目标−峰荷构成分解（测算事实并列，不作归因判断）。试算即时输出，不产生正式运行记录。</div></details>
       <div class="foot"><span class="mono-note">需求类设计§4｜Step 2 已接线（试算）</span><button class="btn pri" onclick="PAGE='gap';rerender()">进入试算</button></div></div>
     <div class="entry"><h3>容量供需系数 <span class="tag lock">待验收</span></h3>
-      <p>公式 v1（Q-D3 六项裁决已收）：系数 = 目标可靠容量 ÷ 核定可靠容量，封顶 1.0、下限 0.0，年度口径。正式口径计算器：试算即出数，带公式版本与输入血缘。</p>
+      <p>公式 v1：系数 = 目标可靠容量 ÷ 核定可靠容量，封顶 1.0、下限 0.0，年度口径。正式口径计算器：试算即出数，带公式版本与输入血缘。</p>
       <details class="disc"><summary>查看字段设计（需求类设计§5）</summary><div class="body">分子＝目标可靠容量（引用已完成目标容量结果或显式输入，MW ≥0）；分母＝核定可靠容量（引用 ELCC/EFC 认可容量结果或人工核定值，MW 必须 >0——分母为零诚实拒绝）；封顶 1.0 与下限 0.0 内置于公式 v1 并输出触发标记；年度口径（月度折算留 Q-S 系列）。本轮不持久化（R-C1）：算过的系数不落盘，刷新后凭引用一键复算；冻结为结算可引用正式结果留待结算模块实施。</div></details>
       <div class="foot"><span class="mono-note">需求类设计§5｜Step 2 已接线（正式口径 v1）</span><button class="btn pri" onclick="PAGE='coef';rerender()">进入试算</button></div></div>
   </div>`;
@@ -25,7 +25,7 @@ function loadDemand(){}
 /* ============ Step2 A4：目标可靠容量向导（PAGE='tcap'，四步制镜像成本向导） ============
  * 来源选择（已完成已发布充裕度运行，服务端 /api/demand/target-capacity/sources）
  * → 新建/选择目标容量项目 → 参数（口径单选：调整完美容量／调整负荷——
- *   Q-D4 已裁决 2026-10-10，两口径并列不可互比）
+ *   两口径并列不可互比）
  * → 服务端检查（preview 类型化校验）→ 确认发起 → 轮询 → 结果投影。
  * 就绪度只读原则不变：向导不代做充裕度测算，来源为空时如实提示。 */
 const TCAP = { step:'src', project:null, source:null, form:{caliber:'adjust_perfect_capacity', metric:'lole_days_per_year', value:'', year:'2027', upper:'100', lower:'0', tol:'25', lowerL:'0.8', upperL:'1.1', tolL:'0.01', maxiter:'12'}, runRef:null, pollTimer:null };
@@ -263,7 +263,7 @@ const GAP = { targetMode:'manual', refProject:'', refRun:'', target:'', accredit
 function viewGapCalc(){
   return `
   <div class="ptitle">容量缺口与备用裕度</div>
-  <div class="psub">确定性算术试算（需求类设计 §4）：不产生正式运行记录；两口径备用裕度分别显示，不混算互替；分资源构成＝构成分解（Q-D2 裁决 2026-10-10：占比展示，非缺供责任分摊）。</div>
+  <div class="psub">确定性算术试算（需求类设计 §4）：不产生正式运行记录；两口径备用裕度分别显示，不混算互替；分资源构成＝构成分解（占比展示，非缺供责任分摊）。</div>
   <div class="hintbar">目标可靠容量可显式输入，或引用一条已完成（已收敛）的目标可靠容量结果——引用经服务端身份环核验，未收敛结果不可引用。分资源构成取各资源 ELCC/EFC 正式结果点值，未核定类型留空不填报。</div>
   <div class="card"><h3>输入</h3>
     <div class="fgrid">
@@ -355,9 +355,9 @@ async function gapCompute(){
 }
 
 /* ============ Step2 C：容量供需系数（PAGE='coef'，正式口径计算器 v1） ============
- * 公式 v1（Q-D3 六项裁决 2026-10-07 冻结）：系数 = clamp(目标可靠容量 ÷ 核定可靠容量, 0.0, 1.0)，年度口径。
+ * 公式 v1：系数 = clamp(目标可靠容量 ÷ 核定可靠容量, 0.0, 1.0)，年度口径。
  * 分子/分母各自「引用/显式」二选一：引用经服务端身份环核验（未收敛/方法不符诚实拒绝）。
- * Step 3 S0（Q-S6 裁决②）：试算（零副作用）＋冻结为正式结果（显式确认动作）两段并存；
+ * 试算（零副作用）＋冻结为正式结果（显式确认动作）两段并存；
  * 冻结后项目完成、系数可进结算；同年多系数人工选定（系统只读列出，不代选）。 */
 const COEF = { numMode:'manual', denMode:'manual', numRefProj:'', numRefRun:'', denRefProj:'', denRefRun:'', target:'', accredited:'', year:'2027', numNote:'', accredNote:'', result:null, freezeName:'', confirmer:'' };
 function viewCoefCalc(){
@@ -392,7 +392,7 @@ function viewCoefCalc(){
   </div>
   <div id="coef-result"></div>
   <div class="card"><h3>冻结为正式结果 <span class="tag lock">显式确认动作</span></h3>
-    <div class="psub">冻结＝把当前表单输入的计算结果固化为<b>可引用正式结果</b>：不可变、带 formula_version 与输入血缘；结算模块只认冻结系数（Q-S6 裁决②）。一个项目一个正式结果——冻结即新建系数项目并完成，不可再改；重新测算请换新名称再冻结。</div>
+    <div class="psub">冻结＝把当前表单输入的计算结果固化为<b>可引用正式结果</b>：不可变、带 formula_version 与输入血缘；结算模块只认冻结系数。一个项目一个正式结果——冻结即新建系数项目并完成，不可再改；重新测算请换新名称再冻结。</div>
     <div class="fgrid">
       <div class="fld"><label><b>系数项目名称</b>（必填；冻结即新建，类型锁定为供需系数）</label><input id="coef-freeze-name" value="${esc(COEF.freezeName)}" placeholder="如：2027年容量供需系数"></div>
       <div class="fld"><label><b>确认人</b>（必填，留痕追溯）</label><input id="coef-confirmer" value="${esc(COEF.confirmer)}" placeholder="姓名/工号"></div>
@@ -477,7 +477,7 @@ function mktTabsBar(){
 function viewMarket(){
   const head = `
   <div class="ptitle">容量市场仿真</div>
-  <div class="psub">需求曲线 × 供给报价 → 出清过程的情景仿真与结果比较（Q-M1—M6 裁决 2026-10-11；统一出清价、单区；市场力披露不阻断）。</div>
+  <div class="psub">需求曲线 × 供给报价 → 出清过程的情景仿真与结果比较（统一出清价、单区；市场力披露不阻断）。</div>
   <div class="hintbar">正式出清内核已接线：②—⑦ 为真实计算（VRR 曲线引用目标容量与 Net CONE；报价申报不得超过核定）。履约考核标签内仍为演示口径。</div>
   ${mktTabsBar()}`;
   if(MKTTAB===0){
@@ -511,7 +511,7 @@ async function loadMarket(){
   if(MKTTAB===7) mktLoadFrozen();
 }
 
-/* ============ 市场出清正式工作台（Q-M1—M6 裁决 2026-10-11；设计 2026-10-11 §4/§5） ============
+/* ============ 市场出清正式工作台 ============
  * ①情景（项目选择/新建）→②需求曲线（VRR 预览图）→③供给报价（台账＋CSV）
  * →④出清设置→⑤出清预览（大图）＋冻结→⑥市场力→⑦结果与报告。
  * 预览零副作用可多次；冻结＝显式动作一次性不可变（rule_version＋确认人必填）。 */
@@ -588,7 +588,7 @@ async function mktCreateProject(){
 }
 function viewMkt2(){
   if(!MKT.project) return mktGuardCard();
-  return `<div class="card"><h3>容量需求曲线（Q-M3：VRR 三点折线）</h3>
+  return `<div class="card"><h3>容量需求曲线（VRR 三点折线）</h3>
     <div class="fgrid">
       <div class="fld"><label><b>目标容量来源</b></label>
         <select onchange="MKT.targetMode=this.value;rerender()">
@@ -650,7 +650,7 @@ function mktCurveSVG(curve){
 function viewMkt3(){
   if(!MKT.project) return mktGuardCard();
   return `<div class="card"><h3>供给报价台账 <span class="tag lock">版本化</span></h3>
-    <div class="psub">每行一个主体：标识, 资源类型, 核定可靠容量MW, 申报容量MW, 报价元/kW·年, 是否合格(true/留空)。核定值取 ELCC/EFC 正式结果点值——<b>申报不得超过核定（Q-M4，超出即阻断）</b>。</div>
+    <div class="psub">每行一个主体：标识, 资源类型, 核定可靠容量MW, 申报容量MW, 报价元/kW·年, 是否合格(true/留空)。核定值取 ELCC/EFC 正式结果点值——<b>申报不得超过核定（超出即阻断）</b>。</div>
     <div id="mkt-ledger" class="loading">台账读取中…</div>
     <details class="disc" style="margin-top:8px"><summary>录入/更新报价（形成新版本）</summary><div class="body">
       <textarea id="mkt-offers" style="width:100%;height:110px;font-family:var(--mono);font-size:12px" placeholder="燃煤A, coal, 300, 300, 60,&#10;光伏B, solar, 500, 500, 110,">${esc(MKT.offersText)}</textarea>
@@ -707,14 +707,14 @@ async function mktImportCsv(){
 }
 function viewMkt4(){
   if(!MKT.project) return mktGuardCard();
-  return `<div class="card"><h3>出清设置（Q-M2/Q-M5/Q-M6）</h3>
+  return `<div class="card"><h3>出清设置</h3>
     <div class="fgrid">
       <div class="fld"><label><b>最低采购要求</b>（MW，>0）</label><input class="num" id="mkt-minproc" value="${esc(MKT.minproc)}"><div class="fh">触顶仍不足此要求 ⇒ 触顶出清＋缺口披露（不静默成功）</div></div>
       <div class="fld"><label>缓解参考成本（元/kW·年，可选）</label><input class="num" id="mkt-mit" value="${esc(MKT.mit)}" placeholder="开启缓解重清对比"><div class="fh">关键供应商报价替换为此值重清一次，两版并列</div></div>
       <div class="fld"><label><b>市场规则版本</b>（冻结必填）</label><input id="mkt-rule" value="${esc(MKT.rule)}" placeholder="如：2027版容量市场规则"></div>
       <div class="fld"><label><b>确认人</b>（冻结必填，留痕）</label><input id="mkt-confirmer" value="${esc(MKT.confirmer)}" placeholder="姓名/工号"></div>
     </div>
-    <div class="mono-note">统一出清价（密封一次性、单区）；同价段按申报容量比例分配并披露；市场力指标为披露性质不阻断出清（Q-M1）。</div></div>`;
+    <div class="mono-note">统一出清价（密封一次性、单区）；同价段按申报容量比例分配并披露；市场力指标为披露性质不阻断出清。</div></div>`;
 }
 function viewMkt5(){
   if(!MKT.project) return mktGuardCard();
@@ -801,7 +801,7 @@ async function mktFreeze(){
 function viewMkt6(){
   if(!MKT.project) return mktGuardCard();
   const r = MKT.result;
-  if(!r) return `<div class="hintbar warn">先在「⑤ 出清过程」跑一次出清预览——市场力画像随出清结果给出（Q-M1：披露不阻断，阈值随规则版本判读）。</div>`;
+  if(!r) return `<div class="hintbar warn">先在「⑤ 出清过程」跑一次出清预览——市场力画像随出清结果给出（披露不阻断，阈值随规则版本判读）。</div>`;
   const p = r.market_power||{};
   const mit = r.mitigation;
   return `<div class="card"><h3>市场力画像 <span class="tag lock">披露不阻断</span></h3>

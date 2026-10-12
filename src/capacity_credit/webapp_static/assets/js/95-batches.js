@@ -2,7 +2,7 @@ let SEL_BATCH = null, AUTH_BY = localStorage.getItem('auth-by') || '';
 function viewBatches(){
   return `
   <div class="ptitle">研究批次 <span class="tag plan">技术视图</span></div>
-  <div class="psub">面向高级操作的<b>技术视图</b>（工程口径原样保留，2026-09-20 裁决 D2）：日常业务测算请走首页六步流程；本页用于矩阵/标定批次的台账级操作。一个批次＝一份多点位研究交付（储能时长矩阵／渗透率矩阵／基准标定）。派生数据按 DR-01a/b 批次级授权自动审批冻结（每份记录规则、参数、父版本哈希与授权人）；失败点位保留诊断并显示为缺口。</div>
+  <div class="psub">面向高级操作的<b>技术视图</b>（工程口径原样保留）：日常业务测算请走首页六步流程；本页用于矩阵/标定批次的台账级操作。一个批次＝一份多点位研究交付（储能时长矩阵／渗透率矩阵／基准标定）。派生数据按批次级授权自动审批冻结（每份记录规则、参数、父版本哈希与授权人）；失败点位保留诊断并显示为缺口。</div>
   <div class="card"><h3>${SEL_BATCH?'批次详情':'创建研究批次'}</h3><div id="bx-main" class="loading">读取中…</div></div>
   <div class="card"><h3>全部批次</h3><div id="bx-list" class="loading">读取中…</div></div>`;
 }

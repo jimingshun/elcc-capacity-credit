@@ -100,7 +100,7 @@ _RISK_FIELD_BY_METRIC: Mapping[RiskMetric, str] = {
 }
 
 # Fixed risk-event whitelist (identity fields are report-layer owned).
-# Q-D1（2026-10-10 裁决）：duration_hours＝事件持续小时（正整数），
+# Q-D1：duration_hours＝事件持续小时（正整数），
 # 引擎事件原生字段，报告视图据此做分年聚合与跨年加权汇总。
 _RISK_EVENT_FIELDS: tuple[str, ...] = (
     "event_time",

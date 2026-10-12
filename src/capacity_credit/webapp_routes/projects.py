@@ -122,7 +122,7 @@ def create_project(h: Any, qs: dict, body: Any) -> None:
         composition = {"storage": "unconfirmed", "hydro": "unconfirmed"}
     if project_kind == "settlement":
         # Step 3 S1-M1：年度结算项目——settlement_config 七字段创建即写入
-        # 并锁定＋年度唯一门（Q-S6 裁决①）；幂等＝同 client_request_id
+        # 并锁定＋年度唯一门（Q-S6 ）；幂等＝同 client_request_id
         # 重试返回同一项目（不误触唯一门）
         try:
             handle = create_settlement_project(
@@ -176,7 +176,7 @@ def restore_project(h: Any, qs: dict, body: Any) -> None:
 
 @route("POST", "/api/projects/composition")
 def set_composition(h: Any, qs: dict, body: Any) -> None:
-    # 用户2026-09-17裁决：创建表单只留名称，储能/水电资源构成
+    # 用户2026-09-17：创建表单只留名称，储能/水电资源构成
     # 申报后移到步骤01（输入数据清单），此端点承接后移的申报
     r = h._service().set_resource_composition(
         str(body.get("project_ref") or ""),

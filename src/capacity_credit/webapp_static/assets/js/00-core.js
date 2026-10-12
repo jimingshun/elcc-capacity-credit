@@ -72,7 +72,7 @@ const dot = (tier) => tier ? `<span class="dot" style="background:${TIER[tier]}"
 /* ============ Step1 两层交互：就绪度只读派生（共享助手，home/settle/market 三处复用） ============
  * 数据源全部为既有只读端点：/api/projects（项目清单）＋逐项目 /api/results?project=
  * （统一结果索引行）＋已发布行的 /api/runs/projection（点值在场判定）。设计稿提到的
- * /api/results/recent 被用户 2026-09-17 裁决钳制为仅最近数条，不能作全工作区就绪判定。
+ * /api/results/recent 仅取最近数条，不能作全工作区就绪判定。
  * Step 2 v2（2026-09-29 R1 授权，设计稿 §6）：①成本域按结果索引行 method 判（旧无类型
  * 成本项目不再漏报）；②ELCC/EFC 计就绪须已发布且取到点值（capacity_view.
  * accredited_capacity_mw；未收敛终态不给点值、不标就绪）；③无扫描上限，旧无类型可靠性
@@ -138,7 +138,7 @@ async function computeReadiness(){
   return {
     netCone,                              // 结算：Net CONE 锚定（供给参数正式结果）
     accredit,                             // 市场：ELCC/EFC 可申报容量（已发布且取到点值）
-    coeff: targetCap && accredit,         // Step2 C：系数可测算＝分子（目标容量点值）与分母（认可容量点值）双就绪（公式 v1 已裁决，派生自既有两旗，不新造数据源）
+    coeff: targetCap && accredit,         // 系数可测算＝分子（目标容量点值）与分母（认可容量点值）双就绪（公式 v1 已定案，派生自既有两旗，不新造数据源）
     coeffFrozen,                          // Step3 S0：已有冻结正式系数（结算引用的前置）
     targetCap,                            // 市场：目标可靠容量（Step2 A 真实派生）
     priceTable,                           // Step3 S1：补偿价表已录入（政策来源在册）
